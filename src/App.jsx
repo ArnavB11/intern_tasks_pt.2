@@ -96,6 +96,7 @@ const LoadingScreen = ({ isFadingOut }) => {
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
+  const [appLoaded, setAppLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
 
@@ -104,12 +105,17 @@ export default function App() {
       setIsFadingOut(true);
     }, 3200);
 
+    const appRevealTimer = setTimeout(() => {
+      setAppLoaded(true);
+    }, 3400);
+
     const unmountTimer = setTimeout(() => {
       setIsLoading(false);
     }, 4800);
 
     return () => {
       clearTimeout(fadeOutTimer);
+      clearTimeout(appRevealTimer);
       clearTimeout(unmountTimer);
     };
   }, []);
@@ -124,10 +130,10 @@ export default function App() {
   return (
     <>
       {isLoading && <LoadingScreen isFadingOut={isFadingOut} />}
-      <div className={`min-h-screen bg-[#F9FAFB] font-sans text-slate-800 transition-opacity duration-1000 ${!isFadingOut && isLoading ? 'opacity-0 h-screen overflow-hidden' : 'opacity-100'}`}>
+      <div className={`min-h-screen bg-[#F9FAFB] font-sans text-slate-800 ${isLoading ? 'h-screen overflow-hidden' : ''}`}>
 
         {/* A. Full-Width Layout Header */}
-        <header className="w-full bg-white py-5 px-8 md:px-16 shadow-sm border-b border-gray-100 flex items-center justify-between sticky top-0 z-10">
+        <header className={`w-full bg-white py-5 px-8 md:px-16 shadow-sm border-b border-gray-100 flex items-center justify-between sticky top-0 z-10 transition-all duration-[1500ms] ease-out transform ${appLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-8'}`}>
           <div className="text-gray-500 font-light text-lg">
             Employee Benefits
           </div>
@@ -137,10 +143,10 @@ export default function App() {
         </header>
 
         {/* Main Content Area */}
-        <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 overflow-x-hidden">
 
           {/* B. The "Featured" Flyer Carousel */}
-          <section className="mb-14">
+          <section className={`mb-14 transition-all duration-[1500ms] delay-[300ms] ease-out transform ${appLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
             <h2 className="text-2xl font-light text-slate-700 mb-6 tracking-wide">Featured</h2>
             <div className="flex items-center justify-center">
               <ChevronLeft />
@@ -173,7 +179,7 @@ export default function App() {
           </section>
 
           {/* C. The "Benefits" Navigation & Control Board */}
-          <section>
+          <section className={`transition-all duration-[1500ms] delay-[600ms] ease-out transform ${appLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
             <h2 className="text-2xl font-light text-slate-700 mb-6 tracking-wide">Benefits</h2>
 
             {/* Search Bar */}
