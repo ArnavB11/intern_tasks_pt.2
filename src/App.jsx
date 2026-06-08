@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // --- Icons (Inline SVGs to keep zero-dependency) ---
 const SearchIcon = () => (
@@ -67,10 +67,52 @@ const mockData = [
 
 const categories = ['All', 'Medical', 'Hotel', 'Restaurant', 'Service'];
 
+// --- Components ---
+const LoadingScreen = ({ isFadingOut }) => {
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setStep(1), 400);   // DOHA
+    const t2 = setTimeout(() => setStep(2), 1200);  // OASIS
+
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
+  return (
+    <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black transition-opacity duration-1000 ease-in-out ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      <div className="text-[#C19A5B] font-serif tracking-[0.2em] text-4xl sm:text-5xl md:text-6xl uppercase flex space-x-6">
+        <span className={`transition-all duration-1000 ease-out transform ${step >= 1 ? 'opacity-100 translate-y-0 blur-none' : 'opacity-0 translate-y-4 blur-sm'}`}>
+          DOHA
+        </span>
+        <span className={`transition-all duration-1000 ease-out transform ${step >= 2 ? 'opacity-100 translate-y-0 blur-none' : 'opacity-0 translate-y-4 blur-sm'}`}>
+          OASIS
+        </span>
+      </div>
+    </div>
+  );
+};
+
 // --- Main Application Component ---
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFadingOut, setIsFadingOut] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+
+  useEffect(() => {
+    const fadeOutTimer = setTimeout(() => {
+      setIsFadingOut(true);
+    }, 2800);
+
+    const unmountTimer = setTimeout(() => {
+      setIsLoading(false);
+    }, 3800);
+
+    return () => {
+      clearTimeout(fadeOutTimer);
+      clearTimeout(unmountTimer);
+    };
+  }, []);
 
   // Real-time filtering based on search text and selected category
   const filteredBenefits = mockData.filter(item => {
@@ -80,7 +122,9 @@ export default function App() {
   });
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] font-sans text-slate-800">
+    <>
+      {isLoading && <LoadingScreen isFadingOut={isFadingOut} />}
+      <div className={`min-h-screen bg-[#F9FAFB] font-sans text-slate-800 transition-opacity duration-1000 ${!isFadingOut && isLoading ? 'opacity-0 h-screen overflow-hidden' : 'opacity-100'}`}>
       
       {/* A. Full-Width Layout Header */}
       <header className="w-full bg-white py-5 px-8 md:px-16 shadow-sm border-b border-gray-100 flex items-center justify-between sticky top-0 z-10">
@@ -210,5 +254,6 @@ export default function App() {
         
       </main>
     </div>
+    </>
   );
 }
