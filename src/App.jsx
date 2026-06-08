@@ -79,7 +79,7 @@ const LoadingScreen = ({ isFadingOut }) => {
   }, []);
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black transition-opacity duration-[1500ms] ease-in-out ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+    <div className={`fixed inset-0 z-50 overflow-hidden flex items-center justify-center bg-black transition-opacity duration-[1500ms] ease-in-out ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
       <div className={`text-[#C19A5B] font-bodoni-moda tracking-[0.05em] text-4xl sm:text-5xl md:text-6xl uppercase flex space-x-7 transition-all duration-[2000ms] ease-in-out origin-center ${isFadingOut ? 'scale-[15] blur-md' : 'scale-100 blur-none'}`}>
         <span className={`transition-all duration-1000 ease-out transform ${step >= 1 ? 'opacity-100 translate-y-0 blur-none' : 'opacity-0 translate-y-4 blur-sm'}`}>
           DOHA
