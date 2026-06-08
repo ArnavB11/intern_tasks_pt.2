@@ -72,15 +72,15 @@ const LoadingScreen = ({ isFadingOut }) => {
   const [step, setStep] = useState(0);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setStep(1), 400);   // DOHA
-    const t2 = setTimeout(() => setStep(2), 1200);  // OASIS
+    const t1 = setTimeout(() => setStep(1), 600);   // DOHA
+    const t2 = setTimeout(() => setStep(2), 1400);  // OASIS
 
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black transition-opacity duration-1000 ease-in-out ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-      <div className="text-[#C19A5B] font-bodoni-moda tracking-[0.2em] text-4xl sm:text-5xl md:text-6xl uppercase flex space-x-6">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black transition-opacity duration-[1500ms] ease-in-out ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      <div className={`text-[#C19A5B] font-bodoni-moda tracking-[0.2em] text-4xl sm:text-5xl md:text-6xl uppercase flex space-x-6 transition-all duration-[2000ms] ease-in-out origin-center ${isFadingOut ? 'scale-[15] blur-md' : 'scale-100 blur-none'}`}>
         <span className={`transition-all duration-1000 ease-out transform ${step >= 1 ? 'opacity-100 translate-y-0 blur-none' : 'opacity-0 translate-y-4 blur-sm'}`}>
           DOHA
         </span>
@@ -102,11 +102,11 @@ export default function App() {
   useEffect(() => {
     const fadeOutTimer = setTimeout(() => {
       setIsFadingOut(true);
-    }, 2800);
+    }, 3200);
 
     const unmountTimer = setTimeout(() => {
       setIsLoading(false);
-    }, 3800);
+    }, 4800);
 
     return () => {
       clearTimeout(fadeOutTimer);
