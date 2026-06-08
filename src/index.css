@@ -7,11 +7,11 @@
 }
 
 /* Hide scrollbar globally but allow scrolling */
-html, body {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+* {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
 }
 
-html::-webkit-scrollbar, body::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
+*::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari and Opera */
 }
