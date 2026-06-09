@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&display=swap');
+
+@theme {
+  --font-bodoni-moda: "Bodoni Moda", serif;
+}
+
+/* Hide scrollbar globally but allow scrolling */
+* {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
+}
+
+*::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari and Opera */
+}
