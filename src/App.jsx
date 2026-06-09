@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 // --- Icons (Inline SVGs to keep zero-dependency) ---
 const SearchIcon = () => (
@@ -68,25 +69,65 @@ const mockData = [
 const categories = ['All', 'Medical', 'Hotel', 'Restaurant', 'Service'];
 
 // --- Components ---
-const LoadingScreen = ({ isFadingOut }) => {
-  const [step, setStep] = useState(0);
+const AnimatedText = ({ text, className = "" }) => {
+  const words = text.split(" ");
 
-  useEffect(() => {
-    const t1 = setTimeout(() => setStep(1), 600);   // DOHA
-    const t2 = setTimeout(() => setStep(2), 1400);  // OASIS
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.08, 
+        delayChildren: 0.4 
+      },
+    },
+  };
 
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, []);
+  const childVariants = {
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        damping: 30,
+        stiffness: 100,
+      },
+    },
+    hidden: {
+      opacity: 0,
+      y: 40,
+    },
+  };
 
   return (
+    <motion.div
+      className={`flex flex-wrap justify-center ${className}`}
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      {words.map((word, wordIndex) => (
+        <span key={wordIndex} className={`whitespace-nowrap overflow-hidden flex py-2 ${wordIndex !== words.length - 1 ? 'mr-7' : ''}`}>
+          {Array.from(word).map((letter, letterIndex) => (
+            <motion.span
+              key={letterIndex}
+              className="inline-block"
+              variants={childVariants}
+            >
+              {letter}
+            </motion.span>
+          ))}
+        </span>
+      ))}
+    </motion.div>
+  );
+};
+
+const LoadingScreen = ({ isFadingOut }) => {
+  return (
     <div className={`fixed inset-0 z-50 overflow-hidden flex items-center justify-center bg-black transition-opacity duration-[1500ms] ease-in-out ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-      <div className={`text-[#C19A5B] font-bodoni-moda tracking-[0.05em] text-4xl sm:text-5xl md:text-6xl uppercase flex space-x-7 transition-all duration-[2000ms] ease-in-out origin-center ${isFadingOut ? 'scale-[15] blur-md' : 'scale-100 blur-none'}`}>
-        <span className={`transition-all duration-1000 ease-out transform ${step >= 1 ? 'opacity-100 translate-y-0 blur-none' : 'opacity-0 translate-y-4 blur-sm'}`}>
-          DOHA
-        </span>
-        <span className={`transition-all duration-1000 ease-out transform ${step >= 2 ? 'opacity-100 translate-y-0 blur-none' : 'opacity-0 translate-y-4 blur-sm'}`}>
-          OASIS
-        </span>
+      <div className={`text-[#C19A5B] font-bodoni-moda tracking-[0.05em] text-4xl sm:text-5xl md:text-6xl uppercase transition-all duration-[2000ms] ease-in-out origin-center ${isFadingOut ? 'scale-[15] blur-md' : 'scale-100 blur-none'}`}>
+        <AnimatedText text="DOHA OASIS" />
       </div>
     </div>
   );
