@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 
 // --- Icons (Inline SVGs to keep zero-dependency) ---
 const SearchIcon = () => (
@@ -46,14 +46,14 @@ const categories = ['All', 'Medical', 'Hotel', 'Restaurant', 'Service'];
 // --- Gold Spinner Element ---
 const MinimalistSpinner = () => (
   <motion.div
-    className="w-12 h-12 border-2 border-gray-800 rounded-full border-t-[#C19A5B]"
+    className="w-12 h-12 border-2 border-gray-800 rounded-full border-t-[#DAB668]"
     animate={{ rotate: 360 }}
     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
   />
 );
 
 // --- Staggered Wave Text Component ---
-const AnimatedText = ({ text, className = "" }) => {
+const AnimatedText = ({ text, className = "", wordSpace = "mr-10", py = "py-4", delay = 0.1, stagger = 0.08, yOffset = 60 }) => {
   const words = text.split(" ");
 
   const containerVariants = {
@@ -61,8 +61,8 @@ const AnimatedText = ({ text, className = "" }) => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.08,
-        delayChildren: 0.1
+        staggerChildren: stagger,
+        delayChildren: delay
       },
     },
   };
@@ -74,11 +74,11 @@ const AnimatedText = ({ text, className = "" }) => {
       transition: {
         type: "spring",
         stiffness: 160, // Snappy entry velocity
-        damping: 8,    // Lower damping for a lively, classy bounce
+        damping: 9,    // Lower damping for a lively, classy bounce
         mass: 0.8,
       },
     },
-    hidden: { opacity: 0, y: 60 },
+    hidden: { opacity: 0, y: yOffset },
   };
 
   return (
@@ -89,7 +89,7 @@ const AnimatedText = ({ text, className = "" }) => {
       animate="visible"
     >
       {words.map((word, wordIndex) => (
-        <span key={wordIndex} className={`whitespace-nowrap overflow-hidden flex py-4 ${wordIndex !== words.length - 1 ? 'mr-10' : ''}`}>
+        <span key={wordIndex} className={`whitespace-nowrap overflow-hidden flex ${py} ${wordIndex !== words.length - 1 ? wordSpace : ''}`}>
           {Array.from(word).map((letter, letterIndex) => (
             <motion.span
               key={letterIndex}
@@ -116,23 +116,23 @@ const LoadingScreen = ({ phase }) => {
     <motion.div
       className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center bg-black pointer-events-none"
       initial={{ opacity: 1 }}
-      // The black background fades out seamlessly during the zoom phase
+      // Delay the black background fade until the text has effectively flown past the camera
       animate={{ opacity: (phase === 'zoom' || phase === 'fadeOut') ? 0 : 1 }}
-      transition={{ duration: 0.8, ease: "easeInOut" }}
+      transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
     >
       <motion.div
         className="relative origin-center transform-gpu flex items-center justify-center w-full"
         animate={{
-          // Scale and fade the text simultaneously with the background
-          scale: (phase === 'zoom' || phase === 'fadeOut') ? 25 : 1,
-          filter: (phase === 'zoom' || phase === 'fadeOut') ? "blur(12px)" : "blur(0px)",
+          // Scale up massively so it rushes past and drop opacity aggressively
+          scale: (phase === 'zoom' || phase === 'fadeOut') ? 40 : 1,
           opacity: (phase === 'zoom' || phase === 'fadeOut') ? 0 : 1
         }}
         transition={{
-          duration: 0.8,
-          ease: [0.6, 0.01, -0.05, 0.95] // Custom premium whip-pan bezier curve
+          scale: { duration: 0.4, ease: [0.7, 0, 0.3, 1] },
+          // Text fades out completely before the black background dissolves
+          opacity: { duration: 0.15, delay: 0.15, ease: "linear" }
         }}
-        style={{ willChange: "transform, filter, opacity" }}
+        style={{ willChange: "transform, opacity" }}
       >
         <AnimatePresence mode="wait">
           {/* Phase 1: Spinning Indicator */}
@@ -155,7 +155,7 @@ const LoadingScreen = ({ phase }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4 }}
-              className="text-[#C19A5B] font-bodoni-moda tracking-[0.08em] text-5xl sm:text-7xl md:text-8xl lg:text-9xl uppercase whitespace-nowrap text-center"
+              className="text-[#DAB668] font-playfair-display text-5xl sm:text-7xl md:text-8xl lg:text-9xl uppercase whitespace-nowrap text-center"
             >
               {/* Only trigger the entrance animations when the container first mounts */}
               <AnimatedText text="DOHA OASIS" />
@@ -174,6 +174,23 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
 
+  // --- Scroll & Bounce Logic ---
+  const { scrollY } = useScroll();
+  const employeeTextOpacity = useTransform(scrollY, [0, 50], [1, 0]);
+  const employeeTextY = useTransform(scrollY, [0, 50], [0, -10]);
+
+  const contentStaggerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.3 } }
+  };
+
+  const bouncyItemVariants = {
+    hidden: { opacity: 0, y: 40 },
+    visible: {
+      opacity: 1, y: 0,
+      transition: { type: "spring", stiffness: 120, damping: 14, mass: 0.8 }
+    }
+  };
   useEffect(() => {
     // 1. Unmount spinner and call character waves
     const textTimer = setTimeout(() => {
@@ -216,23 +233,49 @@ export default function App() {
     <>
       {splashPhase !== 'done' && <LoadingScreen phase={splashPhase} />}
 
-      <div className={`min-h-screen bg-[#F9FAFB] font-sans text-slate-800 ${splashPhase !== 'done' ? 'h-screen overflow-hidden' : ''}`}>
+      <div className={`min-h-screen bg-[#F9FAFB] font-playfair-display text-slate-800 ${splashPhase !== 'done' ? 'h-screen overflow-hidden' : ''}`}>
 
-        {/* A. Full-Width Layout Header */}
-        <header className={`w-full bg-white py-5 px-8 md:px-16 shadow-sm border-b border-gray-100 flex items-center justify-between sticky top-0 z-10 transition-all duration-[1200ms] ease-out transform ${showMainAppContent ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-8'}`}>
-          <div className="text-gray-500 font-light text-lg">
-            Employee Benefits
-          </div>
-          <div className="text-[#C19A5B] font-bodoni-moda tracking-[0.05em] text-xl uppercase">
-            Doha Oasis
-          </div>
-        </header>
+        {/* A. FLOATING EDITORIAL HEADER (With Scroll Fade & Bouncy Drop) */}
+        <motion.header
+          className="fixed top-0 left-0 right-0 py-6 px-8 md:px-16 flex items-start justify-between z-40 pointer-events-none"
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: showMainAppContent ? 1 : 0, y: showMainAppContent ? 0 : -30 }}
+          transition={{ type: "spring", stiffness: 100, damping: 15, delay: 0.1 }}
+        >
+          {/* Left Side: Fades out beautifully on scroll */}
+          <motion.div
+            className="text-gray-500 font-medium text-2xl tracking-wide uppercase mt-2 pointer-events-auto"
+            style={{ opacity: employeeTextOpacity, y: employeeTextY }}
+          >
+            {showMainAppContent ? (
+              <AnimatedText
+                text="Employee Benefits"
+                className="!justify-start"
+                wordSpace="mr-3"
+                py="py-0"
+                delay={0.6}
+                stagger={0.03}
+                yOffset={20}
+              />
+            ) : null}
+          </motion.div>
 
-        {/* Main Content Area */}
-        <main className={`max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 overflow-x-hidden transition-all duration-[1200ms] delay-[300ms] ease-out ${showMainAppContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          {/* Right Side: Anchored Branding */}
+          <div className="pointer-events-auto h-16 flex items-center">
+            <img src="/logo.png" alt="Doha Oasis" className="h-full w-auto object-contain mix-blend-multiply scale-110 origin-right" />
+          </div>
+        </motion.header>
+
+        {/* Main Content Area (With Staggered Bouncy Entrances) */}
+        <motion.main
+          className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-10 overflow-x-hidden"
+          variants={contentStaggerVariants}
+          initial="hidden"
+          animate={showMainAppContent ? "visible" : "hidden"}
+        >
 
           {/* Featured Carousel */}
-          <section className="mb-14">
+          <motion.section variants={bouncyItemVariants} className="mb-14">
             <h2 className="text-2xl font-light text-slate-700 mb-6 tracking-wide">Featured</h2>
             <div className="flex items-center justify-center">
               <ChevronLeft />
@@ -257,10 +300,10 @@ export default function App() {
               </div>
               <ChevronRight />
             </div>
-          </section>
+          </motion.section>
 
           {/* Benefits Directory */}
-          <section>
+          <motion.section variants={bouncyItemVariants}>
             <h2 className="text-2xl font-light text-slate-700 mb-6 tracking-wide">Benefits</h2>
             <div className="relative mb-6">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -306,8 +349,8 @@ export default function App() {
                 </div>
               ))}
             </div>
-          </section>
-        </main>
+          </motion.section>
+        </motion.main>
       </div>
     </>
   );
