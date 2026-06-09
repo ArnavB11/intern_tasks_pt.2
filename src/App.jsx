@@ -74,7 +74,7 @@ const AnimatedText = ({ text, className = "" }) => {
       transition: {
         type: "spring",
         stiffness: 160, // Snappy entry velocity
-        damping: 7,    // Lower damping for a lively, classy bounce
+        damping: 8,    // Lower damping for a lively, classy bounce
         mass: 0.8,
       },
     },
@@ -118,7 +118,7 @@ const LoadingScreen = ({ phase }) => {
       initial={{ opacity: 1 }}
       // The black background fades out seamlessly during the zoom phase
       animate={{ opacity: (phase === 'zoom' || phase === 'fadeOut') ? 0 : 1 }}
-      transition={{ duration: 1.4, ease: "easeInOut" }}
+      transition={{ duration: 0.8, ease: "easeInOut" }}
     >
       <motion.div
         className="relative origin-center transform-gpu flex items-center justify-center w-full"
@@ -129,7 +129,7 @@ const LoadingScreen = ({ phase }) => {
           opacity: (phase === 'zoom' || phase === 'fadeOut') ? 0 : 1
         }}
         transition={{
-          duration: 1.5,
+          duration: 0.8,
           ease: [0.6, 0.01, -0.05, 0.95] // Custom premium whip-pan bezier curve
         }}
         style={{ willChange: "transform, filter, opacity" }}
@@ -183,17 +183,17 @@ export default function App() {
     // 2. Trigger the camera lens zoom forward WHILE the background remains pure black
     const zoomTimer = setTimeout(() => {
       setSplashPhase('zoom');
-    }, 4500); // Gives the text bounce 2.9 seconds to ripple and settle down beautifully
+    }, 3800);
 
     // 3. Drop background opacity to smoothly reveal the website behind the camera path
     const fadeOutTimer = setTimeout(() => {
       setSplashPhase('fadeOut');
-    }, 5600); // Triggers exactly when the letters have scaled past the screen edges
+    }, 4500);
 
     // 4. Completely clean up and garbage-collect the loading elements
     const clearSplashTimer = setTimeout(() => {
       setSplashPhase('done');
-    }, 6800);
+    }, 5500);
 
     return () => {
       clearTimeout(textTimer);
