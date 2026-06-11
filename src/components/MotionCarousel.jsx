@@ -149,7 +149,7 @@ export const MotionCarousel = ({ options, isReady = true }) => {
               key={offer.id}
               className="carousel-slide relative flex-[0_0_100%] min-w-0 h-full overflow-hidden"
             >
-              {/* Background Image */}
+              {/* bg image */}
               <img
                 src={offer.image}
                 alt={offer.title}
@@ -159,7 +159,7 @@ export const MotionCarousel = ({ options, isReady = true }) => {
               <div className={`absolute inset-0 bg-gradient-to-t ${offer.color} mix-blend-multiply`} />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-              {/* Content */}
+              {/* content */}
               <div className="absolute bottom-24 left-0 p-8 md:p-16 lg:px-24 w-full">
                 <h2 className="slide-text text-4xl md:text-6xl lg:text-7xl font-heading italic font-normal text-white leading-tight mb-2">
                   {offer.title}
@@ -173,7 +173,7 @@ export const MotionCarousel = ({ options, isReady = true }) => {
         </div>
       </div>
 
-      {/* Floating Navigation Buttons */}
+      {/*floating nav buttons */}
       <div className="absolute top-1/2 -translate-y-1/2 left-4 md:left-8 z-10">
         <button
           onClick={scrollPrev}
@@ -200,14 +200,13 @@ export const MotionCarousel = ({ options, isReady = true }) => {
         </button>
       </div>
 
-      {/* Floating Pagination Bubbles */}
+      {/* bubbles at the bottom on image carousel */}
       <div className="absolute bottom-12 left-0 right-0 flex justify-center items-center gap-3 z-20">
         {MOCK_OFFERS.map((_, index) => (
           <div
             key={index}
-            className={`pagination-dot w-2 h-2 md:w-3 md:h-3 rounded-full bg-white shadow-lg cursor-pointer border border-white/50 will-change-transform ${
-              index === selectedIndex ? 'opacity-100 scale-125' : 'opacity-50'
-            }`}
+            className={`pagination-dot w-2 h-2 md:w-3 md:h-3 rounded-full bg-white shadow-lg cursor-pointer border border-white/50 will-change-transform ${index === selectedIndex ? 'opacity-100 scale-125' : 'opacity-50'
+              }`}
             onClick={() => emblaApi?.scrollTo(index)}
             onMouseEnter={(e) => {
               gsap.to(e.currentTarget, { y: -6, scale: 1.5, duration: 0.4, ease: "back.out(2)", overwrite: "auto" });
