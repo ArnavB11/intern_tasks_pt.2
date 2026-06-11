@@ -71,19 +71,19 @@ export const MotionCarousel = ({ options, isReady = true }) => {
     emblaApi.on('reInit', onSelect);
   }, [emblaApi, onSelect]);
 
-  // GSAP Animations
+  // gsap animations
   useGSAP(() => {
     // 1. Staggered text reveal whenever the slide changes
     const slides = gsap.utils.toArray('.carousel-slide');
     if (!slides.length) return;
 
-    // Reset all texts to hidden initially
+    // reset all texts to hidden initially
     gsap.set('.slide-text', { opacity: 0, y: 60, scale: 0.8, filter: "blur(12px)", letterSpacing: "12px" });
 
-    // Wait until the splash screen is fully done opening!
+    // wait until the splash screen is fully done opening
     if (!isReady) return;
 
-    // Animate only the active slide's text
+    // animate only the active slide's text
     const activeSlide = slides[selectedIndex];
     if (activeSlide) {
       gsap.to(activeSlide.querySelectorAll('.slide-text'), {
@@ -103,7 +103,7 @@ export const MotionCarousel = ({ options, isReady = true }) => {
       gsap.set(allImgs, { scale: 1 });
     }
 
-    // 2. Pagination Bubbles Animation
+    // pagination bubbles animation
     const dots = gsap.utils.toArray('.pagination-dot');
     dots.forEach((dot, i) => {
       const isActive = i === selectedIndex;
@@ -161,7 +161,7 @@ export const MotionCarousel = ({ options, isReady = true }) => {
 
               {/* Content */}
               <div className="absolute bottom-24 left-0 p-8 md:p-16 lg:px-24 w-full">
-                <h2 className="slide-text text-5xl md:text-7xl lg:text-8xl font-heading italic font-normal text-white leading-tight mb-1">
+                <h2 className="slide-text text-4xl md:text-6xl lg:text-7xl font-heading italic font-normal text-white leading-tight mb-2">
                   {offer.title}
                 </h2>
                 <p className="slide-text text-xl md:text-2xl text-white/90 font-heading font-normal max-w-3xl">
@@ -205,8 +205,16 @@ export const MotionCarousel = ({ options, isReady = true }) => {
         {MOCK_OFFERS.map((_, index) => (
           <div
             key={index}
-            className="pagination-dot w-2 h-2 md:w-3 md:h-3 rounded-full bg-white shadow-lg cursor-pointer border border-white/50 will-change-transform"
+            className={`pagination-dot w-2 h-2 md:w-3 md:h-3 rounded-full bg-white shadow-lg cursor-pointer border border-white/50 will-change-transform ${
+              index === selectedIndex ? 'opacity-100 scale-125' : 'opacity-50'
+            }`}
             onClick={() => emblaApi?.scrollTo(index)}
+            onMouseEnter={(e) => {
+              gsap.to(e.currentTarget, { y: -6, scale: 1.5, duration: 0.4, ease: "back.out(2)", overwrite: "auto" });
+            }}
+            onMouseLeave={(e) => {
+              gsap.to(e.currentTarget, { y: 0, scale: index === selectedIndex ? 1.25 : 1, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+            }}
           />
         ))}
       </div>

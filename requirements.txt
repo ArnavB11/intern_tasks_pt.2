@@ -1,0 +1,9 @@
+react
+react-dom
+gsap
+@gsap/react
+lucide-react
+tailwindcss
+autoprefixer
+postcss
+lenis (loaded via cdn in app.jsx)

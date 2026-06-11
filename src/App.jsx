@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -7,49 +7,74 @@ import { OffersSection } from './components/OffersSection';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// --- Icons (Inline SVGs to keep zero-dependency) ---
-const SearchIcon = () => (
-  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-  </svg>
-);
 
-const ChevronLeft = () => (
-  <svg className="w-8 h-8 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
-  </svg>
-);
-
-const ChevronRight = () => (
-  <svg className="w-8 h-8 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-  </svg>
-);
-
-const ImageIcon = () => (
-  <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-  </svg>
-);
-
-const BasketIcon = () => (
-  <svg className="w-12 h-12 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-  </svg>
-);
-
-// --- Mock Data ---
+// mock data
 const mockData = [
-  { id: 1, title: '20% off on all DO F&B Outlets', category: 'Restaurant', subtitle: null, video: '/video1.mp4', image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=2000' },
-  { id: 2, title: 'Al Hilal Premium Medical Center', category: 'Medical', subtitle: '+974 4431 6633 / +974 3314 3735\nAl Nuaija St, Doha', video: '/video2.mp4', image: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?q=80&w=2000' },
-  { id: 3, title: 'Exclusive Suite Rates & Spa Discounts', category: 'Hotel', subtitle: null, video: '/video3.mp4', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2000' },
-  { id: 4, title: 'Al Hilal Turkish Restaurant', category: 'Restaurant', subtitle: '7032 6737', video: '/video4.mp4', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2000' },
-  { id: 5, title: 'Art Factory', category: 'Service', subtitle: '7728 9955 / 3371 4726', video: '/video5.mp4', image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=2000' },
+  { 
+    id: 1, 
+    title: '20% off on all DO F&B Outlets', 
+    category: 'Restaurant', 
+    subtitle: 'Experience world-class dining with exclusive savings.', 
+    video: '/video1.mp4', 
+    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=2000',
+    description: "Indulge in a culinary journey at Doha Oasis. From authentic Italian cuisine to contemporary Asian fusion, our F&B outlets offer a taste of perfection. Enjoy an exclusive 20% discount on your entire bill at all participating restaurants.",
+    validity: "Valid until December 31, 2026",
+    location: "All Doha Oasis F&B Outlets",
+    terms: ["Discount applies to food and beverage only.", "Cannot be combined with other offers.", "Prior reservation recommended."]
+  },
+  { 
+    id: 2, 
+    title: 'Al Hilal Premium Medical Center', 
+    category: 'Medical', 
+    subtitle: '+974 4431 6633 / +974 3314 3735\nAl Nuaija St, Doha', 
+    video: '/video2.mp4', 
+    image: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?q=80&w=2000',
+    description: "Prioritize your health with premium medical services. Doha Oasis employees and their families receive exclusive priority booking, complimentary health screenings, and comprehensive care discounts at Al Hilal Premium Medical Center.",
+    validity: "Ongoing Benefit",
+    location: "Al Nuaija St, Doha",
+    terms: ["Present employee ID upon arrival.", "Subject to doctor availability.", "Excludes certain surgical procedures."]
+  },
+  { 
+    id: 3, 
+    title: 'Exclusive Suite Rates & Spa Discounts', 
+    category: 'Hotel', 
+    subtitle: 'Luxury stays and rejuvenating spa treatments.', 
+    video: '/video3.mp4', 
+    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2000',
+    description: "Escape into luxury with our exclusive corporate suite rates. Unwind in opulence and treat yourself to our award-winning spa with a 30% discount on all signature treatments. Your ultimate staycation awaits.",
+    validity: "Valid on weekends throughout 2026",
+    location: "Banyan Tree Doha At La Cigale Mushaireb",
+    terms: ["Room upgrades subject to availability.", "Spa discount valid only on treatments over 60 minutes.", "Blackout dates apply."]
+  },
+  { 
+    id: 4, 
+    title: 'Al Hilal Turkish Restaurant', 
+    category: 'Restaurant', 
+    subtitle: '7032 6737', 
+    video: '/video4.mp4', 
+    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2000',
+    description: "Savor the authentic flavors of Turkey right in the heart of Doha. From perfectly grilled kebabs to rich, sweet baklava, Al Hilal offers a 15% discount for all Doha Oasis employees on dining and takeaway.",
+    validity: "Valid daily, excluding public holidays",
+    location: "Doha Oasis Ground Floor",
+    terms: ["Valid for groups of up to 4 people.", "Discount does not apply to delivery platforms."]
+  },
+  { 
+    id: 5, 
+    title: 'Art Factory', 
+    category: 'Service', 
+    subtitle: '7728 9955 / 3371 4726', 
+    video: '/video5.mp4', 
+    image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=2000',
+    description: "Unleash your creativity at the Art Factory. Whether you're looking for painting classes, pottery workshops, or custom framing, enjoy a complimentary introductory session and 10% off all premium art supplies.",
+    validity: "Valid until June 30, 2026",
+    location: "Doha Oasis Mall, Level 2",
+    terms: ["Workshops require 48-hour advance booking.", "Supplies discount limited to selected brands."]
+  },
 ];
 
 const categories = ['All', 'Medical', 'Hotel', 'Restaurant', 'Service'];
 
-// --- Gold Bouncy Loading Element ---
+// gold bouncy loading element
 const BouncyLoadingSpinner = () => {
   return (
     <div className="loading-spinner flex flex-row gap-2">
@@ -60,8 +85,8 @@ const BouncyLoadingSpinner = () => {
   );
 };
 
-// --- Split Text Utility Component for GSAP ---
-const SplitText = ({ text, className = "", wordSpace = "mr-10", py = "py-4", hiddenClass = "" }) => {
+// split text utility component for gsap
+const SplitText = ({ text, className = "", wordSpace = "mr-4 md:mr-10", py = "py-4", hiddenClass = "" }) => {
   const words = text.split(" ");
   return (
     <div className={`flex flex-wrap justify-center ${className}`}>
@@ -82,10 +107,11 @@ const SplitText = ({ text, className = "", wordSpace = "mr-10", py = "py-4", hid
   );
 };
 
-// --- MAIN PORTAL MODULE ---
+// main portal module
 export default function App() {
   const [splashDone, setSplashDone] = useState(false);
   const [carouselReady, setCarouselReady] = useState(false);
+  const [scrollLocked, setScrollLocked] = useState(true);
   const appRef = useRef(null);
   const svgRef = useRef(null);
 
@@ -148,7 +174,7 @@ export default function App() {
     gsap.set('.header-logo', { opacity: 0, y: -20 });
     gsap.set('.loading-text .split-char', { opacity: 0, y: 60 });
 
-    // MASTER CINEMATIC TIMELINE
+    // master cinematic timeline for loading
     const tl = gsap.timeline();
 
     // 1. Loading Spinner Bounce
@@ -174,7 +200,7 @@ export default function App() {
       })
       .addLabel("waveOut", "+=0.1")
 
-      // Slide the text and spinner up synchronously with the wave
+      // slide the text and spinner up synchronously with the wave
       .to('.loading-text-container', {
         y: "-100vh",
         duration: 1.2,
@@ -221,8 +247,18 @@ export default function App() {
     // 4. Main App Content Entrance
     tl.addLabel("contentReveal", "waveOut+=0.6");
 
-    // Make the app content fully visible instantly so the wave itself acts as the smooth reveal
-    tl.set('.main-app-content', { opacity: 1, onComplete: () => ScrollTrigger.refresh() }, "waveOut+=0.2");
+    // make the app content fully visible instantly so the wave itself acts as the smooth reveal
+    tl.set('.main-app-content', { 
+      opacity: 1, 
+      onComplete: () => {
+        setScrollLocked(false);
+        // give the dom a tiny beat to apply the unlocked height, then refresh scrolltrigger & lenis
+        setTimeout(() => {
+          ScrollTrigger.refresh();
+          window.dispatchEvent(new Event('resize'));
+        }, 50);
+      }
+    }, "waveOut+=0.2");
 
     // Hide the loading text behind the wave
     tl.to('.loading-text-container', {
@@ -230,7 +266,7 @@ export default function App() {
       duration: 0.5
     }, "waveOut");
 
-    // Signal the MotionCarousel to start its internal blur reveal animation exactly now
+    // signal the motioncarousel to start its internal blur reveal animation exactly now
     tl.call(() => setCarouselReady(true), null, "contentReveal");
 
     tl.to('.header-fade-text .split-char', {
@@ -249,13 +285,13 @@ export default function App() {
         ease: "power3.out"
       }, "contentReveal")
 
-      // Unmount splash resources safely after everything is completely done
+      // unmount splash resources safely after everything is completely done
       .to({}, { duration: 1.0, onComplete: () => setSplashDone(true) });
 
   }, { scope: appRef });
 
   return (
-    <div ref={appRef} className={`relative min-h-screen bg-black font-body text-white tracking-normal ${!splashDone ? 'h-screen overflow-hidden' : ''}`}>
+    <div ref={appRef} className={`relative min-h-screen bg-black font-body text-white tracking-normal ${scrollLocked ? 'h-screen overflow-hidden' : ''}`}>
 
       {/* LOADING SCREEN */}
       {!splashDone && (
@@ -296,15 +332,15 @@ export default function App() {
       )}
 
       {/* FLOATING EDITORIAL HEADER */}
-      <header className="fixed top-0 left-0 right-0 py-6 px-8 md:px-16 flex items-center justify-between z-40 pointer-events-none">
+      <header className="fixed top-0 left-0 right-0 py-4 px-4 md:py-6 md:px-16 flex items-center justify-between gap-4 md:gap-0 z-40 pointer-events-none">
         {/* Left Side: Fades out on scroll */}
-        <div className="header-fade-text text-white font-medium font-outfit text-2xl tracking-tight uppercase pointer-events-auto flex items-center pl-10 origin-left" style={{ perspective: "1000px" }}>
+        <div className="header-fade-text text-white font-medium font-outfit text-xl md:text-2xl tracking-tight uppercase pointer-events-auto flex items-center pl-2 md:pl-10 origin-left" style={{ perspective: "1000px" }}>
           <SplitText text="Employee Benefits" className="!justify-start" wordSpace="mr-3" py="py-0" hiddenClass="" />
         </div>
 
         {/* Right Side: Anchored Branding */}
-        <div className="header-logo pointer-events-auto h-24 flex items-center mt-2">
-          <img src="/logo.png" alt="Doha Oasis" className="h-18 w-auto object-contain mix-blend-multiply scale-125 origin-right" />
+        <div className="header-logo pointer-events-auto h-16 md:h-24 flex items-center mt-1 md:mt-2 shrink-0">
+          <img src="/logo.png" alt="Doha Oasis" className="h-12 md:h-18 w-auto object-contain mix-blend-multiply scale-110 md:scale-125 origin-right" />
         </div>
       </header>
 

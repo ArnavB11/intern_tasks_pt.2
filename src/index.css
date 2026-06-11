@@ -22,20 +22,19 @@ html, body, #root {
   display: none;
 }
 
-@keyframes luxury-bounce {
 
-  0%,
-  100% {
-    transform: translateY(0);
-    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-  }
-
-  50% {
-    transform: translateY(-25px);
-    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-  }
+/* Custom scrollbar for modals */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  display: block;
 }
-
-.animate-luxury-bounce {
-  animation: luxury-bounce 1s infinite;
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
 }
