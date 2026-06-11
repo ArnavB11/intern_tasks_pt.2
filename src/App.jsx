@@ -10,60 +10,60 @@ gsap.registerPlugin(ScrollTrigger);
 
 // mock data
 const mockData = [
-  { 
-    id: 1, 
-    title: '20% off on all DO F&B Outlets', 
-    category: 'Restaurant', 
-    subtitle: 'Experience world-class dining with exclusive savings.', 
-    video: '/video1.mp4', 
+  {
+    id: 1,
+    title: '20% off on all DO F&B Outlets',
+    category: 'Restaurant',
+    subtitle: 'Experience world-class dining with exclusive savings.',
+    video: '/video1.mp4',
     image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=2000',
     description: "Indulge in a culinary journey at Doha Oasis. From authentic Italian cuisine to contemporary Asian fusion, our F&B outlets offer a taste of perfection. Enjoy an exclusive 20% discount on your entire bill at all participating restaurants.",
     validity: "Valid until December 31, 2026",
     location: "All Doha Oasis F&B Outlets",
     terms: ["Discount applies to food and beverage only.", "Cannot be combined with other offers.", "Prior reservation recommended."]
   },
-  { 
-    id: 2, 
-    title: 'Al Hilal Premium Medical Center', 
-    category: 'Medical', 
-    subtitle: '+974 4431 6633 / +974 3314 3735\nAl Nuaija St, Doha', 
-    video: '/video2.mp4', 
+  {
+    id: 2,
+    title: 'Al Hilal Premium Medical Center',
+    category: 'Medical',
+    subtitle: '+974 4431 6633 / +974 3314 3735\nAl Nuaija St, Doha',
+    video: '/video2.mp4',
     image: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?q=80&w=2000',
     description: "Prioritize your health with premium medical services. Doha Oasis employees and their families receive exclusive priority booking, complimentary health screenings, and comprehensive care discounts at Al Hilal Premium Medical Center.",
     validity: "Ongoing Benefit",
     location: "Al Nuaija St, Doha",
     terms: ["Present employee ID upon arrival.", "Subject to doctor availability.", "Excludes certain surgical procedures."]
   },
-  { 
-    id: 3, 
-    title: 'Exclusive Suite Rates & Spa Discounts', 
-    category: 'Hotel', 
-    subtitle: 'Luxury stays and rejuvenating spa treatments.', 
-    video: '/video3.mp4', 
+  {
+    id: 3,
+    title: 'Exclusive Suite Rates & Spa Discounts',
+    category: 'Hotel',
+    subtitle: 'Luxury stays and rejuvenating spa treatments.',
+    video: '/video3.mp4',
     image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2000',
     description: "Escape into luxury with our exclusive corporate suite rates. Unwind in opulence and treat yourself to our award-winning spa with a 30% discount on all signature treatments. Your ultimate staycation awaits.",
     validity: "Valid on weekends throughout 2026",
     location: "Banyan Tree Doha At La Cigale Mushaireb",
     terms: ["Room upgrades subject to availability.", "Spa discount valid only on treatments over 60 minutes.", "Blackout dates apply."]
   },
-  { 
-    id: 4, 
-    title: 'Al Hilal Turkish Restaurant', 
-    category: 'Restaurant', 
-    subtitle: '7032 6737', 
-    video: '/video4.mp4', 
+  {
+    id: 4,
+    title: 'Al Hilal Turkish Restaurant',
+    category: 'Restaurant',
+    subtitle: '7032 6737',
+    video: '/video4.mp4',
     image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2000',
     description: "Savor the authentic flavors of Turkey right in the heart of Doha. From perfectly grilled kebabs to rich, sweet baklava, Al Hilal offers a 15% discount for all Doha Oasis employees on dining and takeaway.",
     validity: "Valid daily, excluding public holidays",
     location: "Doha Oasis Ground Floor",
     terms: ["Valid for groups of up to 4 people.", "Discount does not apply to delivery platforms."]
   },
-  { 
-    id: 5, 
-    title: 'Art Factory', 
-    category: 'Service', 
-    subtitle: '7728 9955 / 3371 4726', 
-    video: '/video5.mp4', 
+  {
+    id: 5,
+    title: 'Art Factory',
+    category: 'Service',
+    subtitle: '7728 9955 / 3371 4726',
+    video: '/video5.mp4',
     image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=2000',
     description: "Unleash your creativity at the Art Factory. Whether you're looking for painting classes, pottery workshops, or custom framing, enjoy a complimentary introductory session and 10% off all premium art supplies.",
     validity: "Valid until June 30, 2026",
@@ -248,8 +248,8 @@ export default function App() {
     tl.addLabel("contentReveal", "waveOut+=0.6");
 
     // make the app content fully visible instantly so the wave itself acts as the smooth reveal
-    tl.set('.main-app-content', { 
-      opacity: 1, 
+    tl.set('.main-app-content', {
+      opacity: 1,
       onComplete: () => {
         setScrollLocked(false);
         // give the dom a tiny beat to apply the unlocked height, then refresh scrolltrigger & lenis
