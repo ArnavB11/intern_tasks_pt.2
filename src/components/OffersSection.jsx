@@ -25,6 +25,7 @@ export function OffersSection({ offers, categories }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAnimatingFilter, setIsAnimatingFilter] = useState(false);
   const sectionRef = useRef(null);
+  const isInitialMount = useRef(true);
 
   const getFilteredOffers = (search, category) => {
     return offers.filter(offer => {
@@ -48,11 +49,13 @@ export function OffersSection({ offers, categories }) {
     if (cards.length > 0) {
       gsap.to(cards, {
         opacity: 0,
-        y: 40,
-        scale: 0.95,
+        scale: 0.85,
+        rotationX: 10,
+        y: -40,
+        filter: "blur(8px)",
         duration: 0.3,
-        stagger: 0.05,
-        ease: "power2.in",
+        stagger: 0.03,
+        ease: "power3.in",
         onComplete: () => {
           setDisplayOffers(newOffers);
         }
@@ -63,18 +66,21 @@ export function OffersSection({ offers, categories }) {
   };
 
   // when displayOffers updates, animate them in!
-  useEffect(() => {
+  useGSAP(() => {
     const cards = document.querySelectorAll('.offer-card-wrapper');
     if (cards.length > 0) {
       gsap.fromTo(cards,
-        { opacity: 0, y: 40, scale: 0.95 },
+        { opacity: 0, scale: 1.15, rotationX: -10, y: 40, filter: "blur(8px)" },
         {
           opacity: 1,
-          y: 0,
           scale: 1,
-          duration: 0.4,
+          rotationX: 0,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 0.5,
+          delay: 0,
           stagger: 0.05,
-          ease: "power2.out",
+          ease: "expo.out",
           overwrite: "auto",
           onComplete: () => {
             setIsAnimatingFilter(false);
@@ -85,7 +91,7 @@ export function OffersSection({ offers, categories }) {
     } else {
       setTimeout(() => setIsAnimatingFilter(false), 0);
     }
-  }, [displayOffers]);
+  }, { dependencies: [displayOffers], scope: sectionRef });
 
   // quick search update without stagger (typing should feel instant)
   useEffect(() => {
@@ -95,11 +101,19 @@ export function OffersSection({ offers, categories }) {
 
   // keep user anchored to offerssection when filtering
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    
     if (sectionRef.current) {
-      const sectionTop = sectionRef.current.getBoundingClientRect().top + window.scrollY;
-      if (window.scrollY < sectionTop || window.scrollY > sectionTop) {
+      if (window.lenisInstance) {
+        // use Lenis native scroll to target element directly
+        window.lenisInstance.scrollTo(sectionRef.current, { offset: 0, duration: 0.8 });
+      } else {
+        // fallback
+        const sectionTop = sectionRef.current.getBoundingClientRect().top + window.scrollY;
         window.scrollTo({ top: sectionTop, behavior: 'smooth' });
-        setTimeout(() => ScrollTrigger.refresh(), 100);
       }
     }
   }, [activeCategory]);
@@ -200,21 +214,12 @@ export function OffersSection({ offers, categories }) {
     // enlarge the entire card box slightly
     gsap.to(card, { scale: 1.03, duration: 0.8, ease: "power3.out", overwrite: "auto" });
 
-    // play the full screen background video for this card
-    const offerId = card.getAttribute('data-offer-id');
-    const bgVideo = document.getElementById(`bg-video-${offerId}`);
-    if (bgVideo) {
-      bgVideo.currentTime = 0;
-      bgVideo.play().catch(e => console.log("Autoplay blocked", e));
-      gsap.to(bgVideo, { opacity: 0.6, duration: 1.0, ease: "power2.out", overwrite: "auto" });
-    }
 
-    // fade out everything except the text
+
+    // bounce and enlarge image slightly
     const imageContainer = card.querySelector('.parallax-container');
     const cardBg = card.querySelector('.card-bg');
-    if (imageContainer) gsap.to(imageContainer, { opacity: 0, duration: 0.8, ease: "power2.out", overwrite: "auto" });
-    if (cardBg) gsap.to(cardBg, { opacity: 0, duration: 0.8, ease: "power2.out", overwrite: "auto" });
-    if (overlay) gsap.to(overlay, { opacity: 0, duration: 0.8, ease: "power2.out", overwrite: "auto" });
+    if (imageContainer) gsap.to(imageContainer, { scale: 1.05, duration: 0.8, ease: "back.out(1.5)", overwrite: "auto" });
 
     gsap.to(title, { scale: 1.05, duration: 0.8, ease: "power3.out" });
     if (subtitle) gsap.to(subtitle, { opacity: 1, y: 0, duration: 0.5, delay: 0.1, ease: "power2.out" });
@@ -275,19 +280,12 @@ export function OffersSection({ offers, categories }) {
       gsap.to(content, { x: 0, y: 0, duration: 0.8, ease: "power3.inOut", overwrite: "auto" });
     }
 
-    // stop full screen background video
-    const offerId = card.getAttribute('data-offer-id');
-    const bgVideo = document.getElementById(`bg-video-${offerId}`);
-    if (bgVideo) {
-      gsap.to(bgVideo, { opacity: 0, duration: 0.8, ease: "power2.out", onComplete: () => bgVideo.pause(), overwrite: "auto" });
-    }
 
-    // bring card image and backgrounds back
+
+    // return image scale back to normal
     const imageContainer = card.querySelector('.parallax-container');
     const cardBg = card.querySelector('.card-bg');
-    if (imageContainer) gsap.to(imageContainer, { opacity: 1, duration: 0.8, ease: "power2.out", overwrite: "auto" });
-    if (cardBg) gsap.to(cardBg, { opacity: 1, duration: 0.8, ease: "power2.out", overwrite: "auto" });
-    if (overlay) gsap.to(overlay, { opacity: 1, duration: 0.8, ease: "power2.out", overwrite: "auto" });
+    if (imageContainer) gsap.to(imageContainer, { scale: 1, duration: 0.8, ease: "power3.inOut", overwrite: "auto" });
 
     gsap.to(title, { scale: 1, duration: 0.8, ease: "power3.out" });
     if (subtitle) gsap.to(subtitle, { opacity: 0, y: 20, duration: 0.5, ease: "power2.in" });
@@ -332,29 +330,12 @@ export function OffersSection({ offers, categories }) {
   }, [displayOffers]);
 
   return (
-    <section ref={sectionRef} className="relative w-full bg-transparent">
+    <section ref={sectionRef} className="relative w-full bg-white">
 
-      {/* fixed full screen background videos */}
-      <div className="fixed inset-0 w-full h-full pointer-events-none z-0 bg-black">
-        {offers.map((offer) => (
-          offer.video && (
-            <video
-              key={offer.id}
-              id={`bg-video-${offer.id}`}
-              src={offer.video}
-              loop
-              muted
-              playsInline
-              className="absolute inset-0 w-full h-full object-cover opacity-0"
-            />
-          )
-        ))}
-        {/* Dark overlay to ensure foreground elements are readable */}
-        <div className="absolute inset-0 bg-black/40" />
-      </div>
+
 
       {/* DESKTOP SIDEBAR */}
-      <div className="hidden md:flex floating-filter-bar fixed top-1/2 left-6 -translate-y-1/2 z-50 flex-col items-start gap-4 px-4 py-6 bg-[#1a1a1a]/80 backdrop-blur-xl border border-white/10 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.5)] w-48">
+      <div className="hidden md:flex floating-filter-bar fixed top-1/2 left-6 -translate-y-1/2 z-50 flex-col items-start gap-4 px-4 py-6 bg-black border border-white/10 rounded-[2rem] w-48">
         {/* Search */}
         <div className="flex items-center gap-3 w-full">
           <SearchIcon />
@@ -373,8 +354,8 @@ export function OffersSection({ offers, categories }) {
             <button
               key={category}
               onClick={() => handleFilterClick(category)}
-              className={`relative w-full text-left py-2 px-4 text-sm font-medium rounded-xl will-change-transform transition-colors duration-300 ${activeCategory === category
-                ? 'bg-[#DAB668] text-[#111]'
+              className={`relative w-full text-left py-2 px-4 text-sm font-medium rounded-xl will-change-transform transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-105 hover:shadow-lg ${activeCategory === category
+                ? 'bg-[#DAB668] text-[#111] shadow-[0_4px_12px_rgba(218,182,104,0.3)]'
                 : 'text-white/60 hover:text-white hover:bg-white/10'
                 }`}
             >
@@ -388,7 +369,7 @@ export function OffersSection({ offers, categories }) {
       <div className="mobile-fab-container md:hidden fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
         {/* Menu Overlay */}
         <div className={`flex flex-col items-end gap-3 transition-all duration-300 origin-bottom-right ${isMobileMenuOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}`}>
-          <div className="bg-[#1a1a1a]/95 backdrop-blur-xl border border-white/10 rounded-[2rem] p-4 shadow-2xl flex flex-col gap-4 w-[250px]">
+          <div className="bg-black border border-white/10 rounded-[2rem] p-4 flex flex-col gap-4 w-[250px]">
 
             <div className="flex items-center gap-3 w-full px-2">
               <SearchIcon />
@@ -407,9 +388,9 @@ export function OffersSection({ offers, categories }) {
                 <button
                   key={category}
                   onClick={() => handleFilterClick(category)}
-                  className={`w-full text-left py-2 px-4 text-sm font-medium rounded-xl transition-colors duration-300 ${activeCategory === category
-                    ? 'bg-[#DAB668] text-[#111]'
-                    : 'text-white/60 active:bg-white/10'
+                  className={`w-full text-left py-2 px-4 text-sm font-medium rounded-xl will-change-transform transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-105 hover:shadow-lg ${activeCategory === category
+                    ? 'bg-[#DAB668] text-[#111] shadow-[0_4px_12px_rgba(218,182,104,0.3)]'
+                    : 'text-white/60 hover:text-white active:bg-white/10'
                     }`}
                 >
                   {category}
@@ -432,7 +413,7 @@ export function OffersSection({ offers, categories }) {
         {/* List of Full-Screen Cards */}
         {displayOffers.map((offer) => (
           <OfferCard
-            key={offer.id}
+            key={`${activeCategory}-${offer.id}`}
             offer={offer}
             handleMouseEnter={handleMouseEnter}
             handlePointerMove={handlePointerMove}
@@ -482,7 +463,7 @@ const OfferCard = ({ offer, handleMouseEnter, handlePointerMove, handleMouseLeav
       className="offer-card-wrapper w-full h-screen flex-shrink-0 flex flex-col justify-center items-center px-4 md:px-12 py-12"
     >
       <div
-        className="offer-card relative w-full max-w-6xl h-[70vh] md:h-[75vh] rounded-none overflow-hidden cursor-pointer flex items-center justify-center will-change-transform"
+        className="offer-card relative w-full max-w-5xl h-[65vh] md:h-[70vh] rounded-3xl overflow-hidden cursor-pointer flex items-center justify-center will-change-transform"
         data-offer-id={offer.id}
         onMouseEnter={handleMouseEnter}
         onMouseMove={handlePointerMove}
@@ -512,7 +493,7 @@ const OfferCard = ({ offer, handleMouseEnter, handlePointerMove, handleMouseLeav
             {offer.category}
           </span>
 
-          <h3 className="offer-title text-white text-4xl md:text-6xl lg:text-7xl font-heading font-light tracking-wide">
+          <h3 className="offer-title text-white text-3xl md:text-5xl lg:text-6xl font-heading font-light tracking-wide">
             {offer.title}
           </h3>
 
@@ -596,14 +577,10 @@ const OfferModal = ({ offer, onClose }) => {
           </svg>
         </button>
 
-        {/* Left Side: Image/Branding (Hidden on mobile) */}
-        <div className="hidden md:block w-2/5 relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/50 z-10" />
-          <img src={offer.image} alt={offer.title} className="w-full h-full object-cover" />
-        </div>
 
-        {/* Right Side: extra details */}
-        <div className="w-full md:w-3/5 p-6 md:p-10 flex flex-col justify-center">
+
+        {/* Content: extra details */}
+        <div className="w-full p-6 md:p-10 flex flex-col justify-center">
 
           <span className="text-[#DAB668] font-body text-xs tracking-[0.2em] uppercase mb-2">
             {offer.category}

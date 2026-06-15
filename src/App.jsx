@@ -26,7 +26,7 @@ const mockData = [
     id: 2,
     title: 'Al Hilal Premium Medical Center',
     category: 'Medical',
-    subtitle: '+974 4431 6633 / +974 3314 3735\nAl Nuaija St, Doha',
+    subtitle: 'World class medical services at your fingertips',
     video: '/video2.mp4',
     image: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?q=80&w=2000',
     description: "Prioritize your health with premium medical services. Doha Oasis employees and their families receive exclusive priority booking, complimentary health screenings, and comprehensive care discounts at Al Hilal Premium Medical Center.",
@@ -50,7 +50,7 @@ const mockData = [
     id: 4,
     title: 'Al Hilal Turkish Restaurant',
     category: 'Restaurant',
-    subtitle: '7032 6737',
+    subtitle: 'Food',
     video: '/video4.mp4',
     image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2000',
     description: "Savor the authentic flavors of Turkey right in the heart of Doha. From perfectly grilled kebabs to rich, sweet baklava, Al Hilal offers a 15% discount for all Doha Oasis employees on dining and takeaway.",
@@ -62,7 +62,7 @@ const mockData = [
     id: 5,
     title: 'Art Factory',
     category: 'Service',
-    subtitle: '7728 9955 / 3371 4726',
+    subtitle: 'Paintings',
     video: '/video5.mp4',
     image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=2000',
     description: "Unleash your creativity at the Art Factory. Whether you're looking for painting classes, pottery workshops, or custom framing, enjoy a complimentary introductory session and 10% off all premium art supplies.",
@@ -109,13 +109,19 @@ const SplitText = ({ text, className = "", wordSpace = "mr-4 md:mr-10", py = "py
 
 // main portal module
 export default function App() {
-  const [splashDone, setSplashDone] = useState(false);
-  const [carouselReady, setCarouselReady] = useState(false);
-  const [scrollLocked, setScrollLocked] = useState(true);
+  const hasSeenSplash = typeof window !== 'undefined' ? sessionStorage.getItem('hasSeenSplash') === 'true' : false;
+  const [splashDone, setSplashDone] = useState(hasSeenSplash);
+  const [carouselReady, setCarouselReady] = useState(hasSeenSplash);
+  const [scrollLocked, setScrollLocked] = useState(!hasSeenSplash);
   const appRef = useRef(null);
   const svgRef = useRef(null);
 
   useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+
     let lenis;
     let rafId;
 
@@ -167,7 +173,12 @@ export default function App() {
       }
     });
 
-    if (splashDone) return;
+    if (splashDone) {
+      gsap.set('.main-app-content', { opacity: 1 });
+      gsap.set('.header-fade-text .split-char', { opacity: 1, y: 0, scale: 1, rotationX: 0 });
+      gsap.set('.header-logo', { opacity: 1, y: 0 });
+      return;
+    }
 
     // Reset initial states for animations
     gsap.set('.header-fade-text .split-char', { opacity: 0, y: 40, scale: 0.5, rotationX: 90 });
@@ -286,7 +297,10 @@ export default function App() {
       }, "contentReveal")
 
       // unmount splash resources safely after everything is completely done
-      .to({}, { duration: 1.0, onComplete: () => setSplashDone(true) });
+      .to({}, { duration: 1.0, onComplete: () => {
+        setSplashDone(true);
+        if (typeof window !== 'undefined') sessionStorage.setItem('hasSeenSplash', 'true');
+      }});
 
   }, { scope: appRef });
 
