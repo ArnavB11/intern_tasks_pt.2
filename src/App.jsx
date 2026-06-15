@@ -175,8 +175,41 @@ export default function App() {
 
     if (splashDone) {
       gsap.set('.main-app-content', { opacity: 1 });
-      gsap.set('.header-fade-text .split-char', { opacity: 1, y: 0, scale: 1, rotationX: 0 });
+      
+      // Nav bar initial state
+      gsap.set('.nav-bar-container', { maxWidth: 44, backgroundColor: "transparent", borderColor: "transparent", boxShadow: "none" });
+      gsap.set('.search-input-wrapper', { width: 0, opacity: 0 });
+      gsap.set('.categories-container', { opacity: 0, x: 20 });
+      gsap.set('.divider', { opacity: 0, scaleY: 0 });
+
+      gsap.fromTo('.header-fade-text .split-char', 
+        { opacity: 0, y: 40, scale: 0.5, rotationX: 90 },
+        { opacity: 1, y: 0, scale: 1, rotationX: 0, stagger: 0.04, ease: "back.out(2)", duration: 1.2, delay: 0.2 }
+      );
       gsap.set('.header-logo', { opacity: 1, y: 0 });
+      gsap.fromTo('.carousel-container', 
+        { clipPath: "polygon(0 0, 0 0, 0 100%, 0 100%)", boxShadow: "none" }, 
+        { clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)", duration: 1.2, ease: "power3.inOut", clearProps: "clipPath" }
+      );
+      gsap.to('.carousel-container', {
+        boxShadow: "0 30px 60px -15px rgba(0,0,0,0.3)",
+        duration: 1.5,
+        ease: "power2.out",
+        clearProps: "boxShadow",
+        delay: 1.0
+      });
+
+      // Nav bar animation synced with reload
+      const navTl = gsap.timeline({ delay: 0.2 });
+      navTl.to('.nav-bar-container', { maxWidth: 1200, duration: 1.2, ease: "expo.inOut" })
+        .to('.nav-bar-container', { 
+          backgroundColor: "rgba(255, 255, 255, 0.9)", borderColor: "rgba(226, 232, 240, 1)", boxShadow: "0 10px 40px -10px rgba(0,0,0,0.1)",
+          duration: 1.0, ease: "power2.out", clearProps: "all" 
+        }, "-=0.8")
+        .to('.search-input-wrapper', { width: "auto", opacity: 1, duration: 0.6, ease: "power3.out" }, "-=1.0")
+        .to('.divider', { opacity: 1, scaleY: 1, duration: 0.4, ease: "power2.out" }, "-=0.9")
+        .to('.categories-container', { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, "-=0.9");
+
       return;
     }
 
@@ -184,6 +217,13 @@ export default function App() {
     gsap.set('.header-fade-text .split-char', { opacity: 0, y: 40, scale: 0.5, rotationX: 90 });
     gsap.set('.header-logo', { opacity: 0, y: -20 });
     gsap.set('.loading-text .split-char', { opacity: 0, y: 60 });
+    gsap.set('.carousel-container', { clipPath: "polygon(0 0, 0 0, 0 100%, 0 100%)", boxShadow: "none" });
+
+    // Nav bar initial state for first load
+    gsap.set('.nav-bar-container', { maxWidth: 44, backgroundColor: "transparent", borderColor: "transparent", boxShadow: "none" });
+    gsap.set('.search-input-wrapper', { width: 0, opacity: 0 });
+    gsap.set('.categories-container', { opacity: 0, x: 20 });
+    gsap.set('.divider', { opacity: 0, scaleY: 0 });
 
     // master cinematic timeline for loading
     const tl = gsap.timeline();
@@ -280,6 +320,30 @@ export default function App() {
     // signal the motioncarousel to start its internal blur reveal animation exactly now
     tl.call(() => setCarouselReady(true), null, "contentReveal");
 
+    tl.to('.carousel-container', {
+      clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
+      duration: 1.2,
+      ease: "power3.inOut",
+      clearProps: "clipPath"
+    }, "contentReveal");
+
+    tl.to('.carousel-container', {
+      boxShadow: "0 30px 60px -15px rgba(0,0,0,0.3)",
+      duration: 1.5,
+      ease: "power2.out",
+      clearProps: "boxShadow"
+    }, "contentReveal+=0.8");
+
+    // Nav bar animation synced perfectly with contentReveal
+    tl.to('.nav-bar-container', { maxWidth: 1200, duration: 1.2, ease: "expo.inOut" }, "contentReveal")
+      .to('.nav-bar-container', { 
+        backgroundColor: "rgba(255, 255, 255, 0.9)", borderColor: "rgba(226, 232, 240, 1)", boxShadow: "0 10px 40px -10px rgba(0,0,0,0.1)",
+        duration: 1.0, ease: "power2.out", clearProps: "all" 
+      }, "contentReveal+=0.4")
+      .to('.search-input-wrapper', { width: "auto", opacity: 1, duration: 0.6, ease: "power3.out" }, "contentReveal+=0.2")
+      .to('.divider', { opacity: 1, scaleY: 1, duration: 0.4, ease: "power2.out" }, "contentReveal+=0.3")
+      .to('.categories-container', { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, "contentReveal+=0.3");
+
     tl.to('.header-fade-text .split-char', {
       opacity: 1,
       y: 0,
@@ -305,7 +369,7 @@ export default function App() {
   }, { scope: appRef });
 
   return (
-    <div ref={appRef} className={`relative min-h-screen bg-black font-body text-white tracking-normal ${scrollLocked ? 'h-screen overflow-hidden' : ''}`}>
+    <div ref={appRef} className={`relative min-h-screen bg-white font-body text-slate-900 tracking-normal ${scrollLocked ? 'h-screen overflow-hidden' : ''}`}>
 
       {/* LOADING SCREEN */}
       {!splashDone && (
@@ -348,7 +412,7 @@ export default function App() {
       {/* FLOATING EDITORIAL HEADER */}
       <header className="fixed top-0 left-0 right-0 py-4 px-4 md:py-6 md:px-16 flex items-center justify-between gap-4 md:gap-0 z-40 pointer-events-none">
         {/* Left Side: Fades out on scroll */}
-        <div className="header-fade-text text-white font-medium font-outfit text-xl md:text-2xl tracking-tight uppercase pointer-events-auto flex items-center pl-2 md:pl-10 origin-left" style={{ perspective: "1000px" }}>
+        <div className="header-fade-text text-slate-900 font-medium font-outfit text-xl md:text-2xl tracking-tight uppercase pointer-events-auto flex items-center pl-2 md:pl-10 origin-left" style={{ perspective: "1000px" }}>
           <SplitText text="Employee Benefits" className="!justify-start" wordSpace="mr-3" py="py-0" hiddenClass="" />
         </div>
 
@@ -361,11 +425,11 @@ export default function App() {
       {/* MAIN CONTENT */}
       <div className={`main-app-content w-full relative z-0 ${!splashDone ? 'opacity-0' : 'opacity-100'}`}>
 
-        <div className="w-full h-screen relative z-10">
+        <div className="carousel-container w-full max-w-[92%] md:max-w-[85%] mx-auto h-[60vh] md:h-[70vh] mt-24 md:mt-32 mb-16 relative z-10 rounded-none overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border border-slate-200">
           <MotionCarousel options={{ loop: true, align: 'start' }} isReady={carouselReady} />
         </div>
 
-        <OffersSection offers={mockData} categories={categories} />
+        <OffersSection offers={mockData} categories={categories} splashDone={splashDone} />
 
       </div>
     </div>
