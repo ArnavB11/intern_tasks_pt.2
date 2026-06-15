@@ -141,7 +141,7 @@ export const MotionCarousel = ({ options, isReady = true }) => {
   });
 
   return (
-    <div ref={containerRef} className="relative w-full h-screen bg-black">
+    <div ref={containerRef} className="relative w-full h-full bg-black">
       <div className="overflow-hidden h-full" ref={emblaRef}>
         <div className="flex touch-pan-y h-full">
           {MOCK_OFFERS.map((offer) => (

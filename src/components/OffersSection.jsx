@@ -17,7 +17,7 @@ const FilterIcon = () => (
   </svg>
 );
 
-export function OffersSection({ offers, categories }) {
+export function OffersSection({ offers, categories, splashDone }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [displayOffers, setDisplayOffers] = useState(offers);
@@ -118,79 +118,7 @@ export function OffersSection({ offers, categories }) {
     }
   }, [activeCategory]);
 
-  useGSAP(() => {
-    const desktopBar = document.querySelector('.floating-filter-bar');
-    const mobileFab = document.querySelector('.mobile-fab-container');
 
-    let mm = gsap.matchMedia();
-
-    mm.add({
-      isDesktop: "(min-width: 768px)",
-      isMobile: "(max-width: 767px)"
-    }, (context) => {
-      let { isDesktop, isMobile } = context.conditions;
-
-      if (isDesktop && desktopBar) {
-        gsap.set(desktopBar, { xPercent: -150, y: 0, opacity: 0 });
-
-        ScrollTrigger.create({
-          trigger: sectionRef.current,
-          start: "top center",
-          end: "bottom top",
-          onEnter: () => {
-            if (!window.isCardHovered) gsap.to(desktopBar, { xPercent: 0, opacity: 1, duration: 0.5, ease: "power3.out", overwrite: "auto" });
-          },
-          onLeave: () => gsap.to(desktopBar, { xPercent: -150, opacity: 0, duration: 0.25, ease: "power3.in", overwrite: "auto" }),
-          onEnterBack: () => {
-            if (!window.isCardHovered) gsap.to(desktopBar, { xPercent: 0, opacity: 1, duration: 0.5, ease: "power3.out", overwrite: "auto" });
-          },
-          onLeaveBack: () => gsap.to(desktopBar, { xPercent: -150, opacity: 0, duration: 0.25, ease: "power3.in", overwrite: "auto" })
-        });
-      }
-
-      if (isMobile && mobileFab) {
-        gsap.set(mobileFab, { y: 150, opacity: 0 });
-
-        let inHeroSection = true;
-
-        ScrollTrigger.create({
-          trigger: sectionRef.current,
-          start: "top 80%",
-          end: "bottom top",
-          onEnter: () => {
-            inHeroSection = false;
-            gsap.to(mobileFab, { y: 0, opacity: 1, duration: 0.5, ease: "back.out(1.5)", overwrite: "auto" });
-          },
-          onLeave: () => {
-            gsap.to(mobileFab, { y: 150, opacity: 0, duration: 0.25, ease: "power3.in", overwrite: "auto" });
-          },
-          onEnterBack: () => {
-            inHeroSection = false;
-            gsap.to(mobileFab, { y: 0, opacity: 1, duration: 0.5, ease: "back.out(1.5)", overwrite: "auto" });
-          },
-          onLeaveBack: () => {
-            inHeroSection = true;
-            gsap.to(mobileFab, { y: 150, opacity: 0, duration: 0.25, ease: "power3.in", overwrite: "auto" });
-          }
-        });
-
-        ScrollTrigger.create({
-          start: 0,
-          end: "max",
-          onUpdate: (self) => {
-            if (inHeroSection) return;
-            if (Math.abs(self.getVelocity()) > 2) {
-              if (self.direction === 1) {
-                gsap.to(mobileFab, { y: 150, opacity: 0, duration: 0.2, ease: "power3.out", overwrite: "auto" });
-              } else if (self.direction === -1) {
-                gsap.to(mobileFab, { y: 0, opacity: 1, duration: 0.2, ease: "back.out(1.5)", overwrite: "auto" });
-              }
-            }
-          }
-        });
-      }
-    });
-  }, { scope: sectionRef });
 
   // hover animations using gsap
   const { contextSafe } = useGSAP({ scope: sectionRef });
@@ -204,11 +132,6 @@ export function OffersSection({ offers, categories }) {
     const subtitle = card.querySelector('.offer-subtitle');
     const arrow = card.querySelector('.offer-arrow');
     const overlay = card.querySelector('.offer-overlay');
-
-    // slide sidebar out and hide securely
-    if (window.innerWidth >= 768) {
-      gsap.to('.floating-filter-bar', { xPercent: -150, opacity: 0, duration: 0.2, ease: "power3.in", overwrite: "auto" });
-    }
 
 
     // enlarge the entire card box slightly
@@ -267,10 +190,7 @@ export function OffersSection({ offers, categories }) {
     const arrow = card.querySelector('.offer-arrow');
     const overlay = card.querySelector('.offer-overlay');
 
-    // show the sidebar again securely
-    if (window.innerWidth >= 768) {
-      gsap.to('.floating-filter-bar', { xPercent: 0, opacity: 1, duration: 0.4, ease: "power2.out", overwrite: "auto" });
-    }
+
 
     // return card to normal scale and reset 3d rotation
     gsap.to(card, { scale: 1, rotationX: 0, rotationY: 0, duration: 0.8, ease: "power3.inOut", overwrite: "auto" });
@@ -329,84 +249,46 @@ export function OffersSection({ offers, categories }) {
     return () => clearTimeout(timeout);
   }, [displayOffers]);
 
+
   return (
     <section ref={sectionRef} className="relative w-full bg-white">
 
 
 
-      {/* DESKTOP SIDEBAR */}
-      <div className="hidden md:flex floating-filter-bar fixed top-1/2 left-6 -translate-y-1/2 z-50 flex-col items-start gap-4 px-4 py-6 bg-black border border-white/10 rounded-[2rem] w-48">
-        {/* Search */}
-        <div className="flex items-center gap-3 w-full">
-          <SearchIcon />
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent border-none text-white focus:outline-none w-full placeholder-white/40 text-sm font-body"
-          />
-        </div>
-        <div className="w-full h-px bg-white/10"></div>
-        {/* Categories */}
-        <div className="flex flex-col gap-2 w-full mt-4">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => handleFilterClick(category)}
-              className={`relative w-full text-left py-2 px-4 text-sm font-medium rounded-xl will-change-transform transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-105 hover:shadow-lg ${activeCategory === category
-                ? 'bg-[#DAB668] text-[#111] shadow-[0_4px_12px_rgba(218,182,104,0.3)]'
-                : 'text-white/60 hover:text-white hover:bg-white/10'
-                }`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* MOBILE FAB MENU */}
-      <div className="mobile-fab-container md:hidden fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
-        {/* Menu Overlay */}
-        <div className={`flex flex-col items-end gap-3 transition-all duration-300 origin-bottom-right ${isMobileMenuOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}`}>
-          <div className="bg-black border border-white/10 rounded-[2rem] p-4 flex flex-col gap-4 w-[250px]">
-
-            <div className="flex items-center gap-3 w-full px-2">
-              <SearchIcon />
+      {/* HORIZONTAL NAV BAR */}
+      <div className="flex justify-center w-full sticky top-20 md:top-24 z-40 mb-12 px-4 h-[60px]">
+        <div className="nav-bar-container flex flex-row items-center p-2 bg-white/90 backdrop-blur-xl border border-slate-200 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] rounded-full max-w-full overflow-hidden mx-auto h-[44px]">
+          
+          <div className="search-container flex items-center justify-center shrink-0 px-1.5">
+            <SearchIcon />
+            <div className="search-input-wrapper overflow-hidden ml-2 flex items-center shrink-0">
               <input
                 type="text"
-                placeholder="Search offers..."
+                placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent border-none text-white focus:outline-none w-full placeholder-white/40 text-sm font-body"
+                className="bg-transparent border-none text-slate-900 focus:outline-none w-[120px] md:w-[150px] placeholder-slate-400 text-sm font-body"
               />
             </div>
-            <div className="w-full h-px bg-white/10"></div>
+          </div>
 
-            <div className="flex flex-col gap-2 w-full">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => handleFilterClick(category)}
-                  className={`w-full text-left py-2 px-4 text-sm font-medium rounded-xl will-change-transform transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-105 hover:shadow-lg ${activeCategory === category
-                    ? 'bg-[#DAB668] text-[#111] shadow-[0_4px_12px_rgba(218,182,104,0.3)]'
-                    : 'text-white/60 hover:text-white active:bg-white/10'
-                    }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
+          <div className="divider w-px h-5 bg-slate-200 shrink-0 mx-2"></div>
+
+          <div className="categories-container flex items-center gap-1 overflow-x-auto hide-scrollbar shrink-0">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => handleFilterClick(category)}
+                className={`whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md ${activeCategory === category
+                  ? 'bg-slate-900 text-white shadow-md'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+              >
+                {category}
+              </button>
+            ))}
           </div>
         </div>
-
-        {/* The FAB Button */}
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="mobile-fab w-14 h-14 bg-[#DAB668] rounded-full shadow-[0_0_20px_rgba(218,182,104,0.4)] flex items-center justify-center text-black will-change-transform active:scale-95 transition-transform"
-        >
-          <FilterIcon />
-        </button>
       </div>
 
       <div className="w-full flex flex-col pb-32 relative z-10">
