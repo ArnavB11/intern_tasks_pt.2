@@ -6,31 +6,8 @@ import { useGSAP } from '@gsap/react';
 const MOCK_OFFERS = [
   {
     id: 1,
-    title: "50% Off Luxury Spa",
-    subtitle: "Rejuvenate your senses at Doha Oasis Spa",
-    image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    color: "from-orange-500/80 to-amber-600/80"
-  },
-  {
-    id: 2,
-    title: "Exclusive Dining Experience",
-    subtitle: "20% off all F&B outlets for corporate members",
-    image: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
+    image: "/image2.jpg",
     color: "from-slate-800/80 to-black/80"
-  },
-  {
-    id: 3,
-    title: "Premium Suite Upgrade",
-    subtitle: "Complimentary upgrade on weekend stays",
-    image: "https://images.unsplash.com/photo-1566665797739-1674de7a421a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    color: "from-[#DAB668]/90 to-amber-700/80"
-  },
-  {
-    id: 4,
-    title: "Printemps Doha VIP",
-    subtitle: "Extra 15% discount on latest fashion collections",
-    image: "https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    color: "from-orange-600/80 to-red-600/80"
   }
 ];
 
@@ -155,12 +132,9 @@ export const MotionCarousel = ({ options, isReady = true }) => {
                 alt={offer.title}
                 className="slide-bg absolute inset-0 w-full h-full object-cover"
               />
-              {/* Gradient Overlay */}
-              <div className={`absolute inset-0 bg-gradient-to-t ${offer.color} mix-blend-multiply`} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
               {/* content */}
-              <div className="absolute bottom-24 left-0 p-8 md:p-16 lg:px-24 w-full">
+              <div className="absolute bottom-24 left-0 px-20 py-8 md:px-32 md:py-16 lg:px-40 w-full">
                 <h2 className="slide-text text-4xl md:text-6xl lg:text-7xl font-heading italic font-normal text-white leading-tight mb-2">
                   {offer.title}
                 </h2>
