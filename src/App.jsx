@@ -109,10 +109,9 @@ const SplitText = ({ text, className = "", wordSpace = "mr-4 md:mr-10", py = "py
 
 // main portal module
 export default function App() {
-  const hasSeenSplash = typeof window !== 'undefined' ? sessionStorage.getItem('hasSeenSplash') === 'true' : false;
-  const [splashDone, setSplashDone] = useState(hasSeenSplash);
-  const [carouselReady, setCarouselReady] = useState(hasSeenSplash);
-  const [scrollLocked, setScrollLocked] = useState(!hasSeenSplash);
+  const [splashDone, setSplashDone] = useState(false);
+  const [carouselReady, setCarouselReady] = useState(false);
+  const [scrollLocked, setScrollLocked] = useState(true);
   const appRef = useRef(null);
   const svgRef = useRef(null);
 
@@ -126,6 +125,11 @@ export default function App() {
     let rafId;
 
     const initLenis = () => {
+      // Completely disable smooth scrolling on mobile viewports
+      if (typeof window !== 'undefined' && window.innerWidth < 768) {
+        return;
+      }
+
       if (window.Lenis) {
         lenis = new window.Lenis({
           duration: 1.2,
@@ -160,27 +164,15 @@ export default function App() {
   }, []);
 
   useGSAP(() => {
-    // Scroll header fade using ScrollTrigger
-    gsap.to('.header-fade-text', {
-      opacity: 0,
-      y: -20,
-      ease: "none",
-      scrollTrigger: {
-        trigger: "body",
-        start: "top top",
-        end: "200px top",
-        scrub: true
-      }
-    });
 
     if (splashDone) {
       gsap.set('.main-app-content', { opacity: 1 });
       
       // Nav bar initial state
-      gsap.set('.nav-bar-container', { maxWidth: 44, backgroundColor: "transparent", borderColor: "transparent", boxShadow: "none" });
-      gsap.set('.search-input-wrapper', { width: 0, opacity: 0 });
-      gsap.set('.categories-container', { opacity: 0, x: 20 });
-      gsap.set('.divider', { opacity: 0, scaleY: 0 });
+      gsap.set('.nav-bar-container', { clearProps: "all" });
+      gsap.set('.search-input-wrapper', { clearProps: "all" });
+      gsap.set('.categories-container', { clearProps: "all" });
+      gsap.set('.divider', { clearProps: "all" });
 
       gsap.fromTo('.header-fade-text .split-char', 
         { opacity: 0, y: 40, scale: 0.5, rotationX: 90 },
@@ -188,27 +180,15 @@ export default function App() {
       );
       gsap.set('.header-logo', { opacity: 1, y: 0 });
       gsap.fromTo('.carousel-container', 
-        { clipPath: "polygon(0 0, 0 0, 0 100%, 0 100%)", boxShadow: "none" }, 
-        { clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)", duration: 1.2, ease: "power3.inOut", clearProps: "clipPath" }
+        { scale: 1.05, y: 40, boxShadow: "0 30px 60px -15px rgba(0,0,0,0)", clipPath: "polygon(0 0, 0 0, 0 100%, 0 100%)" }, 
+        { scale: 1, y: 0, clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)", boxShadow: "0 30px 60px -15px rgba(0,0,0,0.3)", duration: 1.2, ease: "power3.out", clearProps: "all" }
       );
-      gsap.to('.carousel-container', {
-        boxShadow: "0 30px 60px -15px rgba(0,0,0,0.3)",
-        duration: 1.5,
-        ease: "power2.out",
-        clearProps: "boxShadow",
-        delay: 1.0
-      });
 
-      // Nav bar animation synced with reload
-      const navTl = gsap.timeline({ delay: 0.2 });
-      navTl.to('.nav-bar-container', { maxWidth: 1200, duration: 1.2, ease: "expo.inOut" })
-        .to('.nav-bar-container', { 
-          backgroundColor: "rgba(255, 255, 255, 0.9)", borderColor: "rgba(226, 232, 240, 1)", boxShadow: "0 10px 40px -10px rgba(0,0,0,0.1)",
-          duration: 1.0, ease: "power2.out", clearProps: "all" 
-        }, "-=0.8")
-        .to('.search-input-wrapper', { width: "auto", opacity: 1, duration: 0.6, ease: "power3.out" }, "-=1.0")
-        .to('.divider', { opacity: 1, scaleY: 1, duration: 0.4, ease: "power2.out" }, "-=0.9")
-        .to('.categories-container', { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, "-=0.9");
+      // Nav bar fade in
+      gsap.fromTo('.nav-bar-container', 
+        { y: -20, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 1.0, ease: "power3.out", delay: 0.4, clearProps: "all" }
+      );
 
       return;
     }
@@ -217,13 +197,13 @@ export default function App() {
     gsap.set('.header-fade-text .split-char', { opacity: 0, y: 40, scale: 0.5, rotationX: 90 });
     gsap.set('.header-logo', { opacity: 0, y: -20 });
     gsap.set('.loading-text .split-char', { opacity: 0, y: 60 });
-    gsap.set('.carousel-container', { clipPath: "polygon(0 0, 0 0, 0 100%, 0 100%)", boxShadow: "none" });
+    gsap.set('.carousel-container', { scale: 1.05, y: 80, boxShadow: "0 30px 60px -15px rgba(0,0,0,0)", clipPath: "polygon(0 0, 0 0, 0 100%, 0 100%)" });
 
     // Nav bar initial state for first load
-    gsap.set('.nav-bar-container', { maxWidth: 44, backgroundColor: "transparent", borderColor: "transparent", boxShadow: "none" });
-    gsap.set('.search-input-wrapper', { width: 0, opacity: 0 });
-    gsap.set('.categories-container', { opacity: 0, x: 20 });
-    gsap.set('.divider', { opacity: 0, scaleY: 0 });
+    gsap.set('.nav-bar-container', { y: -30, opacity: 0, width: "52px", overflow: "hidden" });
+    gsap.set('.search-input-wrapper', { opacity: 0 });
+    gsap.set('.categories-container', { opacity: 0 });
+    gsap.set('.divider', { opacity: 0 });
 
     // master cinematic timeline for loading
     const tl = gsap.timeline();
@@ -249,12 +229,14 @@ export default function App() {
         stagger: 0.05,
         ease: "back.out(1.7)"
       })
-      .addLabel("waveOut", "+=0.1")
+      .addLabel("waveOut", "+=0.2")
 
-      // slide the text and spinner up synchronously with the wave
+      // elegantly scale down and fade out the text as the wave lifts
       .to('.loading-text-container', {
-        y: "-100vh",
-        duration: 1.2,
+        y: "-30vh",
+        scale: 0.9,
+        opacity: 0,
+        duration: 1.0,
         ease: "power2.inOut"
       }, "waveOut");
 
@@ -264,17 +246,17 @@ export default function App() {
       const numPoints = 10;
       const numPaths = paths.length;
       const delayPointsMax = 0.3;
-      const delayPerPath = 0; // Decreased to make the white wave thinner
+      const delayPerPath = 0.08;
 
       const allPoints = Array.from({ length: numPaths }, () => Array(numPoints).fill(100));
       const pointsDelay = Array.from({ length: numPoints }, () => Math.random() * delayPointsMax);
 
       const renderPath = (path, points) => {
-        let d = `M 0 ${points[0]} C`;
+        let d = `M 0 ${points[0].toFixed(2)} C`;
         for (let j = 0; j < numPoints - 1; j++) {
           let p = (j + 1) / (numPoints - 1) * 100;
           let cp = p - (1 / (numPoints - 1) * 100) / 2;
-          d += ` ${cp} ${points[j]} ${cp} ${points[j + 1]} ${p} ${points[j + 1]}`;
+          d += ` ${cp.toFixed(2)} ${points[j].toFixed(2)} ${cp.toFixed(2)} ${points[j + 1].toFixed(2)} ${p.toFixed(2)} ${points[j + 1].toFixed(2)}`;
         }
         d += ` V 0 H 0`;
         path.setAttribute("d", d);
@@ -282,7 +264,6 @@ export default function App() {
 
       for (let i = 0; i < numPaths; i++) {
         let points = allPoints[i];
-        // Reverse delay so the top layer (i = numPaths - 1) animates first
         let pathDelay = delayPerPath * (numPaths - 1 - i);
         for (let j = 0; j < numPoints; j++) {
           tl.to(points, {
@@ -296,11 +277,13 @@ export default function App() {
     }
 
     // 4. Main App Content Entrance
-    tl.addLabel("contentReveal", "waveOut+=0.6");
+    tl.addLabel("contentReveal", "waveOut+=0.3");
 
-    // make the app content fully visible instantly so the wave itself acts as the smooth reveal
-    tl.set('.main-app-content', {
+    // smoothly crossfade the app content in as the wave reveals it
+    tl.to('.main-app-content', {
       opacity: 1,
+      duration: 1.2,
+      ease: "power2.inOut",
       onComplete: () => {
         setScrollLocked(false);
         // give the dom a tiny beat to apply the unlocked height, then refresh scrolltrigger & lenis
@@ -309,40 +292,39 @@ export default function App() {
           window.dispatchEvent(new Event('resize'));
         }, 50);
       }
-    }, "waveOut+=0.2");
+    }, "waveOut");
 
-    // Hide the loading text behind the wave
+    // Hide the loading text smoothly by sliding it up with the bg
     tl.to('.loading-text-container', {
-      opacity: 0,
-      duration: 0.5
+      y: "-100vh",
+      duration: 1.2,
+      ease: "power2.inOut"
     }, "waveOut");
 
     // signal the motioncarousel to start its internal blur reveal animation exactly now
     tl.call(() => setCarouselReady(true), null, "contentReveal");
 
     tl.to('.carousel-container', {
+      scale: 1,
+      y: 0,
       clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
-      duration: 1.2,
-      ease: "power3.inOut",
-      clearProps: "clipPath"
+      duration: 1.8,
+      ease: "power3.out",
+      clearProps: "transform,clipPath"
     }, "contentReveal");
 
     tl.to('.carousel-container', {
       boxShadow: "0 30px 60px -15px rgba(0,0,0,0.3)",
-      duration: 1.5,
-      ease: "power2.out",
-      clearProps: "boxShadow"
-    }, "contentReveal+=0.8");
+      duration: 3.0,
+      ease: "sine.inOut"
+    }, "contentReveal+=0.5");
 
-    // Nav bar animation synced perfectly with contentReveal
-    tl.to('.nav-bar-container', { maxWidth: 1200, duration: 1.2, ease: "expo.inOut" }, "contentReveal")
-      .to('.nav-bar-container', { 
-        backgroundColor: "rgba(255, 255, 255, 0.9)", borderColor: "rgba(226, 232, 240, 1)", boxShadow: "0 10px 40px -10px rgba(0,0,0,0.1)",
-        duration: 1.0, ease: "power2.out", clearProps: "all" 
-      }, "contentReveal+=0.4")
-      .to('.search-input-wrapper', { width: "auto", opacity: 1, duration: 0.6, ease: "power3.out" }, "contentReveal+=0.2")
-      .to('.divider', { opacity: 1, scaleY: 1, duration: 0.4, ease: "power2.out" }, "contentReveal+=0.3")
-      .to('.categories-container', { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, "contentReveal+=0.3");
+    // Nav bar pill expansion synced with contentReveal
+    tl.to('.nav-bar-container', { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, "contentReveal")
+      .to('.nav-bar-container', { width: "auto", duration: 1.2, ease: "expo.out", clearProps: "width,overflow" }, "contentReveal+=0.3")
+      .to('.search-input-wrapper', { opacity: 1, duration: 0.8, ease: "power2.out" }, "contentReveal+=0.6")
+      .to('.divider', { opacity: 1, duration: 0.6 }, "contentReveal+=0.8")
+      .to('.categories-container', { opacity: 1, duration: 0.8, clearProps: "all" }, "contentReveal+=0.8");
 
     tl.to('.header-fade-text .split-char', {
       opacity: 1,
@@ -363,13 +345,12 @@ export default function App() {
       // unmount splash resources safely after everything is completely done
       .to({}, { duration: 1.0, onComplete: () => {
         setSplashDone(true);
-        if (typeof window !== 'undefined') sessionStorage.setItem('hasSeenSplash', 'true');
       }});
 
   }, { scope: appRef });
 
   return (
-    <div ref={appRef} className={`relative min-h-screen bg-white font-body text-slate-900 tracking-normal ${scrollLocked ? 'h-screen overflow-hidden' : ''}`}>
+    <div ref={appRef} className={`app-container relative min-h-screen bg-white font-body text-slate-900 tracking-normal ${scrollLocked ? 'h-screen overflow-hidden' : ''}`}>
 
       {/* LOADING SCREEN */}
       {!splashDone && (
@@ -381,18 +362,7 @@ export default function App() {
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
           >
-            <defs>
-              <linearGradient id="gradient1" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#000000" />
-                <stop offset="100%" stopColor="#000000" />
-              </linearGradient>
-              <linearGradient id="gradient2" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#ffffff" />
-                <stop offset="100%" stopColor="#f3f4f6" />
-              </linearGradient>
-            </defs>
-            <path className="shape-overlays__path" fill="url(#gradient2)" d="M 0 100 V 0 H 100 V 100 Z"></path>
-            <path className="shape-overlays__path" fill="url(#gradient1)" d="M 0 100 V 0 H 100 V 100 Z"></path>
+            <path className="shape-overlays__path" fill="#000000" d="M 0 100 V 0 H 100 V 100 Z"></path>
           </svg>
 
           {/* LOADING TEXT & EFFECTS */}
@@ -409,10 +379,10 @@ export default function App() {
         </>
       )}
 
-      {/* FLOATING EDITORIAL HEADER */}
-      <header className="fixed top-0 left-0 right-0 py-4 px-4 md:py-6 md:px-16 flex items-center justify-between gap-4 md:gap-0 z-40 pointer-events-none">
+      {/* ABSOLUTE EDITORIAL HEADER */}
+      <header className="absolute top-0 left-0 right-0 py-4 px-4 md:py-6 md:px-16 flex items-center justify-between gap-4 md:gap-0 z-40 pointer-events-none">
         {/* Left Side: Fades out on scroll */}
-        <div className="header-fade-text text-slate-900 font-medium font-outfit text-xl md:text-2xl tracking-tight uppercase pointer-events-auto flex items-center pl-2 md:pl-10 origin-left" style={{ perspective: "1000px" }}>
+        <div className="header-fade-text text-slate-900 font-medium font-outfit text-lg md:text-2xl tracking-tight uppercase pointer-events-auto flex items-center pl-2 md:pl-10 origin-left" style={{ perspective: "1000px" }}>
           <SplitText text="Employee Benefits" className="!justify-start" wordSpace="mr-3" py="py-0" hiddenClass="" />
         </div>
 
@@ -423,9 +393,9 @@ export default function App() {
       </header>
 
       {/* MAIN CONTENT */}
-      <div className={`main-app-content w-full relative z-0 ${!splashDone ? 'opacity-0' : 'opacity-100'}`}>
+      <div className={`main-app-content w-full relative z-0 pt-24 md:pt-32 ${!splashDone ? 'opacity-0' : 'opacity-100'}`}>
 
-        <div className="carousel-container w-full max-w-[92%] md:max-w-[85%] mx-auto h-[60vh] md:h-[70vh] mt-24 md:mt-32 mb-16 relative z-10 rounded-none overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border border-slate-200">
+        <div className="carousel-container w-full max-w-[92%] md:max-w-[85%] mx-auto h-[60vh] md:h-[70vh] mb-16 relative z-10 rounded-none overflow-hidden border border-slate-200">
           <MotionCarousel options={{ loop: true, align: 'start' }} isReady={carouselReady} />
         </div>
 
