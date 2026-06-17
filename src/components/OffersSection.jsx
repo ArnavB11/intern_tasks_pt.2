@@ -1,23 +1,22 @@
+// --- imports ---
 import { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
+// --- gsap plugins ---
 gsap.registerPlugin(ScrollTrigger);
 
+// --- icon components ---
 const SearchIcon = () => (
   <svg className="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
   </svg>
 );
 
-const FilterIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
-  </svg>
-);
-
+// --- main offers section component ---
 export function OffersSection({ offers, categories, splashDone }) {
+  // --- state & refs ---
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [displayOffers, setDisplayOffers] = useState(offers);
@@ -27,6 +26,7 @@ export function OffersSection({ offers, categories, splashDone }) {
   const sectionRef = useRef(null);
   const isInitialMount = useRef(true);
 
+  // --- utility functions ---
   const getFilteredOffers = (search, category) => {
     return offers.filter(offer => {
       const matchesSearch = offer.title.toLowerCase().includes(search.toLowerCase());
@@ -35,6 +35,7 @@ export function OffersSection({ offers, categories, splashDone }) {
     });
   };
 
+  // --- interaction handlers ---
   // custom category click handler for gsap animation
   const handleFilterClick = (newCategory) => {
     if (isAnimatingFilter || newCategory === activeCategory) return;
@@ -65,6 +66,64 @@ export function OffersSection({ offers, categories, splashDone }) {
     }
   };
 
+  const { contextSafe } = useGSAP({ scope: sectionRef });
+
+  const handleMouseEnter = contextSafe((e) => {
+    if (window.matchMedia('(hover: none)').matches) return;
+    // eslint-disable-next-line react-hooks/immutability
+    window.isCardHovered = true;
+    const card = e.currentTarget;
+
+    // simple float up and slight scale
+    gsap.to(card, { y: -3, scale: 1.005, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+
+    // bounce and enlarge image slightly
+    const imageContainer = card.querySelector('.parallax-container');
+    if (imageContainer) gsap.to(imageContainer, { scale: 1.02, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+  });
+
+  const handleMouseLeave = contextSafe((e) => {
+    if (window.matchMedia('(hover: none)').matches) return;
+    // eslint-disable-next-line react-hooks/immutability
+    window.isCardHovered = false;
+    const card = e.currentTarget;
+
+    // return card to normal position
+    gsap.to(card, { scale: 1, y: 0, duration: 0.3, ease: "power2.out", overwrite: "auto" });
+
+    // return image scale back to normal
+    const imageContainer = card.querySelector('.parallax-container');
+    if (imageContainer) gsap.to(imageContainer, { scale: 1, duration: 0.3, ease: "power2.out", overwrite: "auto" });
+  });
+
+  const openModal = contextSafe((offer) => {
+    setActiveModalOffer(offer);
+    if (window.lenisInstance) window.lenisInstance.stop(); // pause smooth scrolling
+    // eslint-disable-next-line react-hooks/immutability
+    else document.body.style.overflow = 'hidden';
+  });
+
+  const closeModal = contextSafe(() => {
+    gsap.to('.offer-modal-overlay', {
+      opacity: 0,
+      backdropFilter: "blur(0px)",
+      duration: 0.5,
+      ease: "power2.inOut"
+    });
+    gsap.to('.offer-modal-content', {
+      y: 50,
+      opacity: 0,
+      duration: 0.5,
+      ease: "power2.in",
+      onComplete: () => {
+        setActiveModalOffer(null);
+        if (window.lenisInstance) window.lenisInstance.start();
+        else document.body.style.overflow = '';
+      }
+    });
+  });
+
+  // --- effects & animations ---
   // when displayOffers updates, animate them in!
   useGSAP(() => {
     const cards = document.querySelectorAll('.offer-card-wrapper');
@@ -108,7 +167,7 @@ export function OffersSection({ offers, categories, splashDone }) {
     
     if (sectionRef.current) {
       if (window.lenisInstance) {
-        // use Lenis native scroll to target element directly
+        // use lenis native scroll to target element directly
         window.lenisInstance.scrollTo(sectionRef.current, { offset: 0, duration: 0.8 });
       } else {
         // fallback
@@ -118,70 +177,6 @@ export function OffersSection({ offers, categories, splashDone }) {
     }
   }, [activeCategory]);
 
-
-
-  // hover animations using gsap
-  const { contextSafe } = useGSAP({ scope: sectionRef });
-
-  const handleMouseEnter = contextSafe((e) => {
-    if (window.matchMedia('(hover: none)').matches) return;
-    // eslint-disable-next-line react-hooks/immutability
-    window.isCardHovered = true;
-    const card = e.currentTarget;
-
-    // simple float up and slight scale
-    gsap.to(card, { y: -3, scale: 1.005, duration: 0.4, ease: "power2.out", overwrite: "auto" });
-
-    // bounce and enlarge image slightly
-    const imageContainer = card.querySelector('.parallax-container');
-    if (imageContainer) gsap.to(imageContainer, { scale: 1.02, duration: 0.4, ease: "power2.out", overwrite: "auto" });
-  });
-
-
-
-  const handleMouseLeave = contextSafe((e) => {
-    if (window.matchMedia('(hover: none)').matches) return;
-    // eslint-disable-next-line react-hooks/immutability
-    window.isCardHovered = false;
-    const card = e.currentTarget;
-
-    // return card to normal position
-    gsap.to(card, { scale: 1, y: 0, duration: 0.3, ease: "power2.out", overwrite: "auto" });
-
-    // return image scale back to normal
-    const imageContainer = card.querySelector('.parallax-container');
-    if (imageContainer) gsap.to(imageContainer, { scale: 1, duration: 0.3, ease: "power2.out", overwrite: "auto" });
-  });
-
-
-
-  const openModal = contextSafe((offer) => {
-    setActiveModalOffer(offer);
-    if (window.lenisInstance) window.lenisInstance.stop(); // Pause smooth scrolling
-    // eslint-disable-next-line react-hooks/immutability
-    else document.body.style.overflow = 'hidden';
-  });
-
-  const closeModal = contextSafe(() => {
-    gsap.to('.offer-modal-overlay', {
-      opacity: 0,
-      backdropFilter: "blur(0px)",
-      duration: 0.5,
-      ease: "power2.inOut"
-    });
-    gsap.to('.offer-modal-content', {
-      y: 50,
-      opacity: 0,
-      duration: 0.5,
-      ease: "power2.in",
-      onComplete: () => {
-        setActiveModalOffer(null);
-        if (window.lenisInstance) window.lenisInstance.start();
-        else document.body.style.overflow = '';
-      }
-    });
-  });
-
   // ensure gsap scrolltriggers refresh their calculations
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -190,13 +185,11 @@ export function OffersSection({ offers, categories, splashDone }) {
     return () => clearTimeout(timeout);
   }, [displayOffers]);
 
-
+  // --- render jsx ---
   return (
     <section ref={sectionRef} className="relative w-full bg-white">
 
-
-
-      {/* HORIZONTAL NAV BAR */}
+      {/* horizontal nav bar */}
       <div className="flex justify-center w-full sticky top-20 md:top-24 z-40 mb-12 px-4 h-[70px]">
         <div className="nav-bar-container flex flex-row items-center p-2.5 bg-white/90 backdrop-blur-xl border border-slate-200 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] rounded-full max-w-full mx-auto h-[52px]">
           
@@ -242,7 +235,7 @@ export function OffersSection({ offers, categories, splashDone }) {
       </div>
 
       <div className="w-full flex flex-col pb-32 relative z-10">
-        {/* List of Full-Screen Cards */}
+        {/* list of full-screen cards */}
         {displayOffers.map((offer) => (
           <OfferCard
             key={`${activeCategory}-${offer.id}`}
@@ -252,14 +245,30 @@ export function OffersSection({ offers, categories, splashDone }) {
             onClick={() => openModal(offer)}
           />
         ))}
+
+        {/* no results state */}
+        {displayOffers.length === 0 && !isAnimatingFilter && (
+          <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
+            <p className="text-slate-400 text-lg md:text-xl font-body mb-4">No offers found matching your criteria.</p>
+            <button 
+              onClick={() => {
+                setSearchQuery('');
+                handleFilterClick('All');
+              }}
+              className="text-[#DAB668] hover:text-[#c4a15a] font-medium transition-colors border-b border-transparent hover:border-[#c4a15a] pb-0.5"
+            >
+              Clear all filters
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* The Cinematic Modal */}
+      {/* the cinematic modal */}
       {activeModalOffer && (
         <OfferModal offer={activeModalOffer} onClose={closeModal} />
       )}
 
-      {/* Mobile Filter Menu */}
+      {/* mobile filter menu */}
       {isMobileMenuOpen && (
         <>
           <style>{`
@@ -303,8 +312,11 @@ export function OffersSection({ offers, categories, splashDone }) {
   );
 }
 
+// --- sub components ---
+
 // refactored sub-component without gsap entry animation to prevent flashes on rapid typing
 const OfferCard = ({ offer, handleMouseEnter, handleMouseLeave, onClick }) => {
+  // --- refs & animations ---
   const cardContainerRef = useRef(null);
 
   useGSAP(() => {
@@ -329,6 +341,7 @@ const OfferCard = ({ offer, handleMouseEnter, handleMouseLeave, onClick }) => {
     }
   }, { scope: cardContainerRef });
 
+  // --- render jsx ---
   return (
     <div
       ref={cardContainerRef}
@@ -345,7 +358,7 @@ const OfferCard = ({ offer, handleMouseEnter, handleMouseLeave, onClick }) => {
           }
         }}
       >
-        {/* Left Side: Image */}
+        {/* left side: image */}
         <div className="card-image-container relative h-full w-[100px] md:w-[280px] shrink-0 overflow-hidden border-r border-slate-100">
           <div className="parallax-container absolute inset-[-15%] z-0 pointer-events-none">
             {offer.image && (
@@ -358,7 +371,7 @@ const OfferCard = ({ offer, handleMouseEnter, handleMouseLeave, onClick }) => {
           </div>
         </div>
 
-        {/* Middle Side: Text Content */}
+        {/* middle side: text content */}
         <div className="flex-1 min-w-0 flex flex-col justify-center px-4 md:px-10 py-2 md:py-4 h-full relative z-30 pointer-events-none bg-white">
           <span className="text-slate-500 font-body text-[10px] md:text-xs tracking-widest uppercase mb-0.5 md:mb-2">
             {offer.category}
@@ -373,7 +386,7 @@ const OfferCard = ({ offer, handleMouseEnter, handleMouseLeave, onClick }) => {
           )}
         </div>
 
-        {/* Right Side: Arrow Container (Desktop Only) */}
+        {/* right side: arrow container (desktop only) */}
         <div className="hidden md:flex w-[140px] shrink-0 h-full items-center justify-center bg-slate-50/50 border-l border-slate-100 relative">
           <div
             className="offer-arrow w-8 h-8 md:w-14 md:h-14 rounded-full border border-slate-200 flex items-center justify-center bg-white shadow-sm z-40 cursor-pointer pointer-events-none group-hover:pointer-events-auto"
@@ -404,6 +417,7 @@ const OfferCard = ({ offer, handleMouseEnter, handleMouseLeave, onClick }) => {
 
 // cinematic glassmorphism modal component
 const OfferModal = ({ offer, onClose }) => {
+  // --- refs & animations ---
   const modalRef = useRef(null);
 
   useGSAP(() => {
@@ -426,18 +440,19 @@ const OfferModal = ({ offer, onClose }) => {
     );
   }, { scope: modalRef });
 
+  // --- render jsx ---
   return (
     <div ref={modalRef} className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 pointer-events-auto">
-      {/* Clickable Backdrop overlay */}
+      {/* clickable backdrop overlay */}
       <div
         className="offer-modal-overlay absolute inset-0 bg-black/60 cursor-pointer"
         onClick={onClose}
       />
 
-      {/* Modal Container */}
+      {/* modal container */}
       <div className="offer-modal-content relative w-[95vw] max-w-6xl bg-[#1f2022] backdrop-blur-3xl rounded-none shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col md:flex-row">
 
-        {/* Close Button */}
+        {/* close button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-50 text-white/60 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10"
@@ -449,7 +464,7 @@ const OfferModal = ({ offer, onClose }) => {
 
 
 
-        {/* Content: extra details */}
+        {/* content: extra details */}
         <div className="w-full p-6 md:p-10 flex flex-col justify-center">
 
           <span className="text-[#DAB668] font-body text-xs tracking-[0.2em] uppercase mb-2">

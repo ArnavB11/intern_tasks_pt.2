@@ -1,8 +1,10 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+// --- imports ---
+import { useCallback, useEffect, useState, useRef } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 
+// --- mock data ---
 const MOCK_OFFERS = [
   {
     id: 1,
@@ -11,6 +13,7 @@ const MOCK_OFFERS = [
   }
 ];
 
+// --- icon components ---
 const ChevronLeft = () => (
   <svg className="w-6 h-6 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7"></path>
@@ -23,11 +26,14 @@ const ChevronRight = () => (
   </svg>
 );
 
+// --- main carousel component ---
 export const MotionCarousel = ({ options, isReady = true }) => {
+  // --- state & refs ---
   const [emblaRef, emblaApi] = useEmblaCarousel(options);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const containerRef = useRef(null);
 
+  // --- embla navigation logic ---
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev();
   }, [emblaApi]);
@@ -41,6 +47,7 @@ export const MotionCarousel = ({ options, isReady = true }) => {
     setSelectedIndex(emblaApi.selectedScrollSnap());
   }, [emblaApi]);
 
+  // --- embla event listeners ---
   useEffect(() => {
     if (!emblaApi) return;
     onSelect();
@@ -48,9 +55,9 @@ export const MotionCarousel = ({ options, isReady = true }) => {
     emblaApi.on('reInit', onSelect);
   }, [emblaApi, onSelect]);
 
-  // gsap animations
+  // --- gsap entry & slide animations ---
   useGSAP(() => {
-    // 1. Staggered text reveal whenever the slide changes
+    // staggered text reveal whenever the slide changes
     const slides = gsap.utils.toArray('.carousel-slide');
     if (!slides.length) return;
 
@@ -75,7 +82,7 @@ export const MotionCarousel = ({ options, isReady = true }) => {
         overwrite: "auto"
       });
 
-      // Ensure images are perfectly static
+      // ensure images are perfectly static
       const allImgs = document.querySelectorAll('.slide-bg');
       gsap.set(allImgs, { scale: 1 });
     }
@@ -95,6 +102,7 @@ export const MotionCarousel = ({ options, isReady = true }) => {
     });
   }, { scope: containerRef, dependencies: [selectedIndex, isReady] });
 
+  // --- gsap hover interaction handlers ---
   const { contextSafe } = useGSAP({ scope: containerRef });
 
   const handleArrowEnter = contextSafe((e, direction) => {
@@ -117,6 +125,7 @@ export const MotionCarousel = ({ options, isReady = true }) => {
     gsap.to(e.currentTarget, { scale: 1.15, duration: 0.4, ease: "power3.out", overwrite: "auto" });
   });
 
+  // --- render jsx ---
   return (
     <div ref={containerRef} className="relative w-full h-full bg-black">
       <div className="overflow-hidden h-full" ref={emblaRef}>
@@ -129,7 +138,7 @@ export const MotionCarousel = ({ options, isReady = true }) => {
               {/* bg image */}
               <img
                 src={offer.image}
-                alt={offer.title}
+                alt={offer.title || `Slide ${offer.id}`}
                 className="slide-bg absolute inset-0 w-full h-full object-cover"
               />
 
@@ -147,7 +156,7 @@ export const MotionCarousel = ({ options, isReady = true }) => {
         </div>
       </div>
 
-      {/*floating nav buttons */}
+      {/* floating nav buttons */}
       <div className="absolute top-1/2 -translate-y-1/2 left-4 md:left-8 z-10">
         <button
           onClick={scrollPrev}
