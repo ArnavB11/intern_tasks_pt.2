@@ -1,3 +1,4 @@
+// --- imports ---
 import { useState, useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -5,10 +6,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { MotionCarousel } from './components/MotionCarousel';
 import { OffersSection } from './components/OffersSection';
 
+// --- gsap plugins ---
 gsap.registerPlugin(ScrollTrigger);
 
-
-// mock data
+// --- mock data ---
 const mockData = [
   {
     id: 1,
@@ -74,7 +75,7 @@ const mockData = [
 
 const categories = ['All', 'Medical', 'Hotel', 'Restaurant', 'Service'];
 
-// gold bouncy loading element
+// --- loading spinner component ---
 const BouncyLoadingSpinner = () => {
   return (
     <div className="loading-spinner flex flex-row gap-2">
@@ -85,7 +86,7 @@ const BouncyLoadingSpinner = () => {
   );
 };
 
-// split text utility component for gsap
+// --- split text utility component ---
 const SplitText = ({ text, className = "", wordSpace = "mr-4 md:mr-10", py = "py-4", hiddenClass = "" }) => {
   const words = text.split(" ");
   return (
@@ -107,14 +108,16 @@ const SplitText = ({ text, className = "", wordSpace = "mr-4 md:mr-10", py = "py
   );
 };
 
-// main portal module
+// --- main app component ---
 export default function App() {
+  // --- state & refs ---
   const [splashDone, setSplashDone] = useState(false);
   const [carouselReady, setCarouselReady] = useState(false);
   const [scrollLocked, setScrollLocked] = useState(true);
   const appRef = useRef(null);
   const svgRef = useRef(null);
 
+  // --- lenis smooth scroll initialization ---
   useEffect(() => {
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
@@ -125,7 +128,7 @@ export default function App() {
     let rafId;
 
     const initLenis = () => {
-      // Completely disable smooth scrolling on mobile viewports
+      // completely disable smooth scrolling on mobile viewports
       if (typeof window !== 'undefined' && window.innerWidth < 768) {
         return;
       }
@@ -143,7 +146,7 @@ export default function App() {
           rafId = requestAnimationFrame(raf);
         }
         rafId = requestAnimationFrame(raf);
-        window.lenisInstance = lenis; // Expose globally to fix scroll jumping
+        window.lenisInstance = lenis; // expose globally to fix scroll jumping
       }
     };
 
@@ -163,12 +166,13 @@ export default function App() {
     };
   }, []);
 
+  // --- gsap master animations ---
   useGSAP(() => {
 
     if (splashDone) {
       gsap.set('.main-app-content', { opacity: 1 });
       
-      // Nav bar initial state
+      // nav bar initial state
       gsap.set('.nav-bar-container', { clearProps: "all" });
       gsap.set('.search-input-wrapper', { clearProps: "all" });
       gsap.set('.categories-container', { clearProps: "all" });
@@ -184,7 +188,7 @@ export default function App() {
         { scale: 1, y: 0, clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)", boxShadow: "0 30px 60px -15px rgba(0,0,0,0.3)", duration: 1.2, ease: "power3.out", clearProps: "all" }
       );
 
-      // Nav bar fade in
+      // nav bar fade in
       gsap.fromTo('.nav-bar-container', 
         { y: -20, opacity: 0 }, 
         { y: 0, opacity: 1, duration: 1.0, ease: "power3.out", delay: 0.4, clearProps: "all" }
@@ -193,13 +197,13 @@ export default function App() {
       return;
     }
 
-    // Reset initial states for animations
+    // reset initial states for animations
     gsap.set('.header-fade-text .split-char', { opacity: 0, y: 40, scale: 0.5, rotationX: 90 });
     gsap.set('.header-logo', { opacity: 0, y: -20 });
     gsap.set('.loading-text .split-char', { opacity: 0, y: 60 });
     gsap.set('.carousel-container', { scale: 1.05, y: 80, boxShadow: "0 30px 60px -15px rgba(0,0,0,0)", clipPath: "polygon(0 0, 0 0, 0 100%, 0 100%)" });
 
-    // Nav bar initial state for first load
+    // nav bar initial state for first load
     gsap.set('.nav-bar-container', { y: -30, opacity: 0, width: "52px", overflow: "hidden" });
     gsap.set('.search-input-wrapper', { opacity: 0 });
     gsap.set('.categories-container', { opacity: 0 });
@@ -208,7 +212,7 @@ export default function App() {
     // master cinematic timeline for loading
     const tl = gsap.timeline();
 
-    // 1. Loading Spinner Bounce
+    // 1. loading spinner bounce
     tl.to('.loading-spinner .dot', {
       y: -15,
       duration: 0.4,
@@ -221,7 +225,7 @@ export default function App() {
     })
       .to('.loading-spinner', { scale: 0, opacity: 0, duration: 0.4, ease: "back.in(1.5)" })
 
-      // 2. Doha Oasis Text Waves
+      // 2. doha oasis text waves
       .to('.loading-text .split-char', {
         opacity: 1,
         y: 0,
@@ -240,7 +244,7 @@ export default function App() {
         ease: "power2.inOut"
       }, "waveOut");
 
-    // 3. SVG Wave Transition
+    // 3. svg wave transition
     const paths = svgRef.current ? svgRef.current.querySelectorAll('.shape-overlays__path') : [];
     if (paths.length) {
       const numPoints = 10;
@@ -276,7 +280,7 @@ export default function App() {
       }
     }
 
-    // 4. Main App Content Entrance
+    // 4. main app content entrance
     tl.addLabel("contentReveal", "waveOut+=0.3");
 
     // smoothly crossfade the app content in as the wave reveals it
@@ -294,7 +298,7 @@ export default function App() {
       }
     }, "waveOut");
 
-    // Hide the loading text smoothly by sliding it up with the bg
+    // hide the loading text smoothly by sliding it up with the bg
     tl.to('.loading-text-container', {
       y: "-100vh",
       duration: 1.2,
@@ -319,7 +323,7 @@ export default function App() {
       ease: "sine.inOut"
     }, "contentReveal+=0.5");
 
-    // Nav bar pill expansion synced with contentReveal
+    // nav bar pill expansion synced with contentReveal
     tl.to('.nav-bar-container', { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, "contentReveal")
       .to('.nav-bar-container', { width: "auto", duration: 1.2, ease: "expo.out", clearProps: "width,overflow" }, "contentReveal+=0.3")
       .to('.search-input-wrapper', { opacity: 1, duration: 0.8, ease: "power2.out" }, "contentReveal+=0.6")
@@ -349,13 +353,14 @@ export default function App() {
 
   }, { scope: appRef });
 
+  // --- render jsx ---
   return (
     <div ref={appRef} className={`app-container relative min-h-screen bg-white font-body text-slate-900 tracking-normal ${scrollLocked ? 'h-screen overflow-hidden' : ''}`}>
 
-      {/* LOADING SCREEN */}
+      {/* --- loading screen --- */}
       {!splashDone && (
         <>
-          {/* SVG WAVE TRANSITION OVERLAY */}
+          {/* svg wave transition overlay */}
           <svg
             ref={svgRef}
             className="shape-overlays fixed inset-0 w-full h-full pointer-events-none z-[60]"
@@ -365,7 +370,7 @@ export default function App() {
             <path className="shape-overlays__path" fill="#000000" d="M 0 100 V 0 H 100 V 100 Z"></path>
           </svg>
 
-          {/* LOADING TEXT & EFFECTS */}
+          {/* loading text & effects */}
           <div className="loading-text-container fixed inset-0 z-[70] flex flex-col items-center justify-center pointer-events-none">
 
             <div className="loading-spinner-wrapper absolute">
@@ -379,20 +384,20 @@ export default function App() {
         </>
       )}
 
-      {/* ABSOLUTE EDITORIAL HEADER */}
+      {/* --- absolute editorial header --- */}
       <header className="absolute top-0 left-0 right-0 py-4 px-4 md:py-6 md:px-16 flex items-center justify-between gap-4 md:gap-0 z-40 pointer-events-none">
-        {/* Left Side: Fades out on scroll */}
+        {/* left side: title text */}
         <div className="header-fade-text text-slate-900 font-medium font-outfit text-lg md:text-2xl tracking-tight uppercase pointer-events-auto flex items-center pl-2 md:pl-10 origin-left" style={{ perspective: "1000px" }}>
           <SplitText text="Employee Benefits" className="!justify-start" wordSpace="mr-3" py="py-0" hiddenClass="" />
         </div>
 
-        {/* Right Side: Anchored Branding */}
+        {/* right side: anchored branding logo */}
         <div className="header-logo pointer-events-auto h-16 md:h-24 flex items-center mt-1 md:mt-2 shrink-0">
           <img src="/logo.png" alt="Doha Oasis" className="h-12 md:h-18 w-auto object-contain mix-blend-multiply scale-110 md:scale-125 origin-right" />
         </div>
       </header>
 
-      {/* MAIN CONTENT */}
+      {/* --- main content --- */}
       <div className={`main-app-content w-full relative z-0 pt-24 md:pt-32 ${!splashDone ? 'opacity-0' : 'opacity-100'}`}>
 
         <div className="carousel-container w-full max-w-[92%] md:max-w-[85%] mx-auto h-[60vh] md:h-[70vh] mb-16 relative z-10 rounded-none overflow-hidden border border-slate-200">
